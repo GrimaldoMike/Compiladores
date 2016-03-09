@@ -1,0 +1,104 @@
+
+JUEGO ::= 'juego' 'id' ':' VARS? FUNCION* MAIN
+
+VARS ::= 'var' 'id' VARS2 ':' TIPO ';'
+
+VARS2 ::= ',' 'id' VARS2 |
+
+TIPO ::= 'int' | 'float' | 'char'
+
+MAIN ::= 'main' '(' ')' BLOQUE
+ 
+BLOQUE ::= '{' ESTATUTO '}'
+
+ESTATUTO ::= (( ASIGNACION | CONDICION | LECTURA | ESCRITURA | LLAMADA | PERSONAJE | RETURN | LOOPWHILE| LOOPFOR | VARS) ';')+
+ 
+ESTATUTO2 ::= (( ASIGNACION | CONDICION | LECTURA | ESCRITURA | LLAMADA | RETURN | LOOPWHILE| LOOPFOR | VARS?) ';')*
+
+ASIGNACION ::= 'id' VAR_SIZE? '=' EXPRESION
+
+VAR_SIZE ::= '[' EXP ']' ('[' EXP ']')?
+
+EXPRESION ::= EXP (('>' | '<' | '>=' | '<=' | '==' | '<>') EXP | )?
+
+EXP ::= TERMINO EXP2
+
+EXP2 ::= '+' EXP | '-' EXP |
+
+TERMINO ::= FACTOR TERMINO2
+
+TERMINO2 ::= '*' TERMINO | '/' TERMINO |
+
+FACTOR ::= '(' EXPRESION ')' | FACTOR2 VARCTE | LLAMADA
+
+FACTOR2 ::= '+' | '-' | 
+
+VARCTE ::= 'id' | 'cte_i' | 'cte_f' | 'TRUE' | 'FALSE'
+
+CONDICION ::= 'if' '(' EXPRESION ')' BLOQUE ('else' BLOQUE | )
+
+ESCRITURA ::= 'output' '(' ESCRITURA2
+
+ESCRITURA2 ::= 'cte.string' ESCRITURA3 | EXPRESION ESCRITURA3
+
+ESCRITURA3 ::=  ')' | ',' ESCRITURA2
+
+LECTURA ::= 'input' '(' 'id'+ ')'
+
+FUNCION ::= 'function' 'id' '(' PARAMS ')' BLOQUE
+
+PARAMS::= (TIPO 'id')*
+
+LLAMADA ::= 'id' '(' LLAMADA2 ')'  
+
+LLAMADA2 ::=  EXPRESION LLAMADA3 | 
+
+LLAMADA3 ::=  ',' EXPRESION LLAMADA3 |
+
+PERSONAJE::= ('personaje' 'id' '{' FVARS_ASIGNACION? ARCHETYPE ESTATUTO2 '}' )+
+
+RETURN ::= 'return' EXPRESION
+
+LOOPWHILE ::= 'while' '(' EXPRESION ')'  BLOQUE
+
+LOOPFOR ::= 'for' '(' ASIGNACION ';' EXPRESION ';' EXPRESION ')' BLOQUE
+
+FVARS_ASIGNACION ::= ( ('life' | 'stun' | 'time') '=' EXP )+ 
+
+ARCHETYPE ::= 'type' '=' ('shoto' 'comandos' '=' SCOMANDO | 'grappler' 'comandos' '=' GCOMANDO | 'charge' 'comandos' '=' CCOMANDO)
+
+SCOMANDO::= 'st' (ESTADO | ATTACK | SESPECIAL )*
+
+GCOMANDO::= 'st' (ESTADO | ATTACK | GESPECIAL )*
+
+CCOMANDO::= 'st' (ESTADO | ATTACK | CESPECIAL )*
+
+ESTADO::= 'st' | 'cr' | 'j' | 'f' | 'b'
+
+SESPECIAL ::= QCF | QCB | FDDF
+
+GESPECIAL ::= SPD | LRT
+
+CESPECIAL ::= BF | DU
+
+QCF ::= '2' '3' '6' PUNCH
+
+QCB ::= '2' '1' '4' KICK
+
+FDDF::= '6' '2' '3' PUNCH
+
+SPD::= '8' '9' '6' '3' '2' '1' '4' '7' PUNCH
+
+LRT::= PUNCH PUNCH PUNCH | KICK KICK KICK
+
+BF::= '4' '4' '6' PUNCH
+
+DU::= '2' '2' '8' KICK
+
+ATTACK ::= PUNCH | KICK | GRAB
+
+PUNCH::= 'P' ('L' |'M'| 'H')
+
+KICK::= 'K' ('L' |'M'| 'H')
+
+GRAB::= 'g' 'P' 'H'

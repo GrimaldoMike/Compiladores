@@ -1,0 +1,7 @@
+juego compitiendo :
+	var x : int;
+	
+function suma ( int a) {
+	a = 5 + 2;	
+
+}	
