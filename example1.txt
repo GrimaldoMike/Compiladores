@@ -3,5 +3,5 @@ juego compitiendo :
 	
 function suma ( int a) {
 	a = 5 + 2;	
-
+	a = a + 1;
 }	
