@@ -1,18 +1,30 @@
-# Tarea 3 Python
-# PLY de MyLittleDuck 2016
+# Proyecto compilador Python
+# PLY de Fight Compilers 2016
 # Parte Yacc
 # Hecho por Jaime Neri y Mike Grimaldo
 
 import ply.yacc as yacc
 import FightCompilersLex
+import FightCompilersSemantics
 import sys
 
 tokens = FightCompilersLex.tokens
 
-#Parsing Rules
+# Parsing Rules
+
+# Diccionario de procedimientos
+# procs = { ID : {
+#				Tipo : CHAR | INT | VOID | MAIN
+#				Params :
+#				Var_Table :
+#			}
+#		  }
+procs = { }
+# d['a'].append(list1)
 
 def p_juego(p):
 	'''Juego : JUEGO ID DOSP JuegoA JuegoB MainProgram'''
+	procs = FightCompilersSemantics.add_procs_to_dict(p[2],p[1], 'void', {})
 
 def p_juegoa(p):
 	'''JuegoA : Vars 
@@ -24,6 +36,7 @@ def p_juegob(p):
 
 def p_vars(p):
 	'''Vars : VAR ID Vars2 DOSP Tipo PCOMA'''
+	procs = FightCompilersSemantics.add_vars_to_dict(p[2],p[5],'void')
 
 def p_vars2(p):
 	'''Vars2 : COMA ID Vars2 
@@ -32,7 +45,8 @@ def p_vars2(p):
 def p_tipo(p):
 	'''Tipo : INT
 			| FLOAT
-			| CHAR '''
+			| CHAR
+			| VOID'''
 
 def p_mainprogram(p):
 	'''MainProgram : MAIN PAR_I PAR_D Bloque'''
@@ -142,12 +156,19 @@ def p_escritura(p):
 	'''Escritura : OUTPUT PAR_I Escritura2'''
 
 def p_escritura2(p):
-	'''Escritura2 : CTE_STRING Escritura3 
-				  | Expresion Escritura3'''
+	'''Escritura2 :  Expresion Escritura3
+				  |  COMILLA Escritura4'''
 
 def p_escritura3(p):
-	'''Escritura3 :  PAR_D 
+	'''Escritura3 : PAR_D
 				  | COMA Escritura2'''
+
+# Revisar para que funcione con CTE_STRING en un futuro cercano
+# ¿Por qué no lo toma...?
+def p_escritura4(p):
+	'''Escritura4 : ID Escritura4 
+				  | COMILLA Escritura3'''
+				  
 
 def p_lectura(p):
 	'''Lectura : INPUT PAR_I ID LecturaA PAR_D '''
@@ -157,13 +178,10 @@ def p_lecturaa(p):
 				| empty '''
 
 def p_funcion(p):
-	'''Funcion : FUNCTION ID PAR_I Params PAR_D Bloque'''
+	'''Funcion : FUNCTION Tipo ID PAR_I Params PAR_D Bloque'''
 
 def p_params(p):
-	'''Params : Params2'''
-
-def p_params2(p):
-	'''Params2 : Tipo ID Params2
+	'''Params : Tipo ID Params
 			   | empty '''
 
 def p_llamada(p):
@@ -301,8 +319,11 @@ def p_empty(p):
 	''' empty : '''
 
 def p_error(p):
-	if p.type == "ID":
-		print ("Syntax error: token identificador no es correcto!")
+	print ("Sintx error en: ")
+	print (p.type)
+	
+#	if p.type == "ID":
+#		print ("Syntax error: token identificador no es correcto!")
 #	if 	'CTE_STRING'	 ==  p.type:
 #		print "Syntax error: token string no es correcto!"	
 #	if 	 'COMA'	 ==  p.type:

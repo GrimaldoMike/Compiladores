@@ -1,6 +1,8 @@
-# PLY
-# Parte Lex 
+# Proyecto compilador Python
+# PLY de Fight Compilers 2016
+# Parte Lex
 # Hecho por Jaime Neri y Mike Grimaldo
+
 
 import ply.lex as lex
 import sys
@@ -48,6 +50,7 @@ t_COR_D = r'\]'
 t_PCOMA = r';'
 t_COMA = r','
 t_DOSP = r':'
+t_COMILLA = r'"'
 t_CTE_STRING = r'[a-zA-Z_][a-zA-Z0-9_]*'
 t_ignore = ' \t\n\r\f\v' #ignorar espacios
 
@@ -67,6 +70,7 @@ reservadas = {
     'int'       : 'INT',
     'float'     : 'FLOAT',
     'char'      : 'CHAR',
+    'void'      : 'VOID',
     'life'      : 'LIFE',
     'stun'      : 'STUN',
     'time'      : 'TIME',
@@ -84,7 +88,7 @@ reservadas = {
 
 tokens = [
     'ID', 
-    'CTE_STRING', 'COMA', 'PCOMA',  'DOSP', 
+    'CTE_STRING', 'COMA', 'PCOMA',  'DOSP','COMILLA',
     'STANDING', 'CROUCHING', 'JUMPING', 'FORWARD', 'BACKWARD', 'QCF', 'QCB', 'SRK', 'BBF', 'DDU', 'SPD', 'PUNCH', 'KICK', 'GRAB',
     'OP_PLUS', 'OP_MIN', 'OP_MULT', 'OP_DIV', 'EXP_EQ', 'EXP_GT', 'EXP_LT', 'EXP_NEQ', 'EXP_GEQ', 'EXP_LEQ', 'EXP_DEQ',
     'LLAVE_I', 'LLAVE_D', 'COR_I', 'COR_D', 'PAR_I', 'PAR_D', 

@@ -1,7 +1,11 @@
 juego compitiendo :
 	var x : int;
 	
-function suma ( int a) {
+function suma ( int a ) {
 	a = 5 + 2;	
-	a = a + 1;
 }	
+
+main (){
+
+ output ( oijd );
+}
