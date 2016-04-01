@@ -27,11 +27,15 @@ procs_types = []	#Lista de elementos que guarda los tipos de procedimientos
 
 # Parsing Rules
 def p_juego(p):
-	'''Juego : JUEGO ID DOSP JuegoA JuegoB MainProgram'''
+	'''Juego : JUEGO ID Juego_1'''
 	x.current_fid = p[2]
 	pass
-	x.procs = x.add_procs_to_dict(p[2],p[1], 'void', var_dict)
-	pp.pprint(x.procs)
+	#x.procs = x.add_procs_to_dict(p[2],p[1], 'void', var_dict)
+	procs_values.append(p[2])
+	pp.pprint(procs_values)
+	
+def p_juego_1(p):
+	'''Juego_1 : DOSP JuegoA JuegoB MainProgram'''
 
 
 def p_juegoa(p):
