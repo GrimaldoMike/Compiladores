@@ -72,7 +72,7 @@ def p_vars2(p):
 				sizes1 = vars_size.pop()
 			identificador =ids.dequeue()
 			x.var = x.add_vars_to_dict(tipo,sizes1, sizes2)	#Se manda llamar el proceso de agregar variable al dict y lo guarda en el objeto
-			var_dict.update({identificador: x.var})
+	pass
 
 	#print(p[5])
 	#c = 0
@@ -85,15 +85,12 @@ def p_vars3(p):
 	'''Vars3 : COMA Vars2
 			| empty'''
 	pass
-	#if p[1] == ',':
-		#vars_size.append('@')
+	
 
 def p_varsize(p):
 	'''VarSize : COR_I Exp COR_D
-				| empty empty empty'''
+				| empty'''
 	pass
-	if p[3] == ']':
-		vars_size.append('@')
 
 def p_tipo(p):
 	'''Tipo : INT
@@ -277,27 +274,27 @@ def p_loopfor(p):
 	''' LoopFor : FOR LLAVE_D Asignacion PCOMA Expresion PCOMA Expresion LLAVE_I Bloque '''
 
 def p_fvarasignacion(p):
-	''' FVarsAsignacion : LIFE EXP_EQ Exp FVarsAsignacionA
-						| STUN EXP_EQ Exp FVarsAsignacionA
-						| TIME EXP_EQ Exp FVarsAsignacionA '''
+	''' FVarsAsignacion :     LIFE EXP_EQ Exp FVarsAsignacionA
+				| STUN EXP_EQ Exp FVarsAsignacionA
+				| TIME EXP_EQ Exp FVarsAsignacionA '''
 
 def p_fvarasignaciona(p):
-	''' FVarsAsignacionA : FVarsAsignacion 
-						 | empty'''
+	''' FVarsAsignacionA :    FVarsAsignacion 
+				| empty'''
 
 def p_archetype(p):
 	''' Archetype : TYPE EXP_EQ ArchetypeA '''
 
 def p_archetypea(p):
-	''' ArchetypeA : SHOTO COMANDOS EXP_EQ Scomando
-			   	   | GRAPPLER COMANDOS EXP_EQ Gcomando
-				   | CHARGE COMANDOS EXP_EQ Ccomando '''
+	''' ArchetypeA :  SHOTO EXP_EQ Scomando
+			| GRAPPLER EXP_EQ Gcomando
+			| CHARGE COMANDOS EXP_EQ Ccomando '''
 
 def p_scomando(p):
 	''' Scomando : STANDING ScomandoA '''
 
 def p_scomandoa(p):
-	''' ScomandoA : Estado ScomandoA
+	''' ScomandoA :   Estado ScomandoA
 			| Attack ScomandoA
 			| Sespecial ScomandoA
 			| empty '''

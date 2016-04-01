@@ -13,20 +13,20 @@ if sys.version_info[0] >= 3:
 
 # Tokens
 
-t_STANDING = r'st'
-t_CROUCHING = r'cr'
-t_JUMPING = r'j'
-t_FORWARD = r'f'
-t_BACKWARD = r'b'
-t_QCF = r'236'
-t_QCB = r'214'
-t_SRK = r'623'
-t_BBF = r'446'
-t_DDU = r'228'
-t_SPD = r'89632147'
-t_PUNCH = r'P(L|M|H)'
-t_KICK = r'K(L|M|H)'
-t_GRAB = r'gPH'
+t_STANDING = r'.st'
+t_CROUCHING = r'.cr'
+t_JUMPING = r'.j'
+t_FORWARD = r'.f'
+t_BACKWARD = r'.b'
+t_QCF = r'.236'
+t_QCB = r'.214'
+t_SRK = r'.623'
+t_BBF = r'.446'
+t_DDU = r'.228'
+t_SPD = r'.89632147'
+t_PUNCH = r'.P(L|M|H)'
+t_KICK = r'.K(L|M|H)'
+t_GRAB = r'.gPH'
 
 t_OP_PLUS    = r'\+'
 t_OP_MIN   = r'-'
@@ -87,13 +87,12 @@ reservadas = {
 # Lista de tokens
 
 tokens = [
-    'ID', 
-    'CTE_STRING', 'COMA', 'PCOMA',  'DOSP','COMILLA',
+    'ID',
+    'CTE_STRING', 'COMA', 'PCOMA', 'DOSP','COMILLA',
     'STANDING', 'CROUCHING', 'JUMPING', 'FORWARD', 'BACKWARD', 'QCF', 'QCB', 'SRK', 'BBF', 'DDU', 'SPD', 'PUNCH', 'KICK', 'GRAB',
     'OP_PLUS', 'OP_MIN', 'OP_MULT', 'OP_DIV', 'EXP_EQ', 'EXP_GT', 'EXP_LT', 'EXP_NEQ', 'EXP_GEQ', 'EXP_LEQ', 'EXP_DEQ',
-    'LLAVE_I', 'LLAVE_D', 'COR_I', 'COR_D', 'PAR_I', 'PAR_D', 
+    'LLAVE_I', 'LLAVE_D', 'COR_I', 'COR_D', 'PAR_I', 'PAR_D',
     'CTE_I', 'CTE_F'] + list(reservadas.values())
-
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'

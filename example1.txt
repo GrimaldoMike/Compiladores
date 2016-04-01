@@ -1,11 +1,22 @@
-juego compitiendo :
-	var x : int;
+juego Juego_A :
+	var x [3][4] : int, y [5]: char;
 	
-function suma ( int a ) {
-	a = 5 + 2;	
-}	
+function int suma ( int a ) {
+    
+    if (5>6){
+	a = 5 + 2 * (4/2);
+	};
+
+    personaje mike { 
+        life = 100
+        stun = 300
+        type = shoto
+        comandos = .st .cr .KM .236 .PM
+        };
+}
 
 main (){
 
- output ( oijd );
+ output ( "que tal chavo" );
 }
+
