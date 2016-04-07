@@ -1,7 +1,7 @@
 juego Juego_A :
-	var x [3][4] : int, y [5]: char;
+	var x [1][2] : int, y[3][4]: char;
 	
-function int suma ( int a ) {
+function int suma ( float a,  int b ) {
     
     if (5>6){
 	a = 5 + 2 * (4/2);
@@ -15,8 +15,21 @@ function int suma ( int a ) {
         };
 }
 
+function char resta ( float c,  int d ) {
+    
+    if (5>6){
+	a = 5 + 2 * (4/2);
+	};
+
+    personaje neri { 
+        life = 100
+        stun = 300
+        type = shoto
+        comandos = .st .cr .KM .236 .PM
+        };
+}
+
 main (){
 
  output ( "que tal chavo" );
 }
-

@@ -21,21 +21,36 @@ var_dict = {}
 vars_values = []	#Lista de elementos que guarda el valor de variables
 vars_types = []		#Lista de elementos que guarda los tipos de variables
 vars_size = []		#Lista de elementos que guarda el tamano de variables
+procs_names = []	#Lista de elementos que guarda el nombre de procedimientos
 procs_values = []	#Lista de elementos que guarda el valor de procedimientos
 procs_types = []	#Lista de elementos que guarda los tipos de procedimientos
+
+var_brackList = []
+
+
 
 
 # Parsing Rules
 def p_juego(p):
-	'''Juego : JUEGO ID Juego_1'''
+	'''Juego : JUEGO ID DOSP JuegoA JuegoB MainProgram'''
 	x.current_fid = p[2]
 	pass
-	#x.procs = x.add_procs_to_dict(p[2],p[1], 'void', var_dict)
-	procs_values.append(p[2])
-	pp.pprint(procs_values)
 	
-def p_juego_1(p):
-	'''Juego_1 : DOSP JuegoA JuegoB MainProgram'''
+	#var_brackList = [4, 5 ,6] 
+	#var_brackList[0] = 4
+	#len(var_brackList) = 3
+	for c in range(len(var_brackList)):
+		z = var_brackList.pop()
+		if (z == '@'):
+			pass
+		else:
+			var_dict.update(z)
+	x.procs.update(x.add_procs_to_dict(p[2],p[1], 'void', var_dict))
+	#print len(var_brackList)
+	pp.pprint(x.procs)
+	#print(var_brackList.pop())
+	#print(var_dict)
+
 
 
 def p_juegoa(p):
@@ -52,31 +67,40 @@ def p_vars(p):
 def p_vars2(p):
 	'''Vars2 : ID COR_I Exp COR_D VarSize DOSP Tipo Vars3 '''
 	pass
-	print(vars_size)
+	#print(vars_size)
 	if (ids.vars_exists_in_list((p[1]))):
 		vars_types.pop()
-		vars_values.pop()
-		if len(vars_size) > 1:	#Si existe mas de 1 elemento en la lista de tamano de variables obtiene 2 elementos
-			vars_size.pop()
-			vars_size.pop()
-		else:					#Si no, solo obtiene 1 elemento
-			vars_size.pop()		
+		#vars_values.pop()
+		
+		#['4', '@', 5, '@']                                                                                                         
+		poptemp = vars_size.pop() 
+		if (poptemp != "@") and not vars_size:	#Si existe mas de 1 elemento en la lista de tamano de variables obtiene 2 elementos
+			poptemp = vars_size.pop()
 	else:
 		ids.enqueue(p[1])
 		if ids.size() > 0:		#Si encuentra que existe un id, significa que hay que agregarlo a la tabla de variables
-			#valor = p[2]
 			tipo = vars_types.pop()	#obtiene el tipo de la lista de de tipos
-			#vars_types.append(tipo)
-			sizes1 = None
-			sizes2 = None
-			if len(vars_size) > 1:	#Si existe mas de 1 elemento en la lista de tamano de variables obtiene 2 elementos
-				sizes2 = vars_size.pop()
-				sizes1 = vars_size.pop()
-			else:					#Si no, solo obtiene 1 elemento
-				sizes1 = vars_size.pop()
-			identificador =ids.dequeue()
+			#Aqui empieza la validacion  de VARSIZE
+			if (vars_size):		#si la lista no esta vacia
+				vars_size.pop()				#siempre hay un @ antes de 1 numero, asi que se saca
+				poptemp = vars_size.pop()	#se saca el primer valor despues del @
+				sizes2 = poptemp			#se guarda el primer valor como sizes2, por si la lista no esta vacia
+				if (vars_size):				#si la lista no esta vacia
+					poptemp = vars_size.pop()	#se saca el segundo valor 
+					if(poptemp != '@'):		#se analiza el segundo valor, si no es @ se guarda como sizes1
+						sizes1 = poptemp
+					else:					#si es @ se devuelve a la lista
+						sizes1 = sizes2		#sizes1 es igual a sizes2, porque ya sabems que no hay un segundo varsize
+						sizes2 = None		#
+						vars_size.append('@')  #se agrega un @ para que siempre quede un @ antes de un numero
+				else:					#si la lista esta vacia, significa que es el ultimo elemento. 
+					sizes1 = sizes2		#sizes1 es igual a sizes2, porque ya sabemos que no hay un segundo varsize
+					sizes2 = None
+			identificador = ids.dequeue()
 			x.var = x.add_vars_to_dict(tipo,sizes1, sizes2)	#Se manda llamar el proceso de agregar variable al dict y lo guarda en el objeto
-			var_dict.update({identificador: x.var})
+			#var_dict.update({identificador: x.var})
+			var_brackList.append({identificador: x.var})
+
 
 	#print(p[5])
 	#c = 0
@@ -96,8 +120,8 @@ def p_varsize(p):
 	'''VarSize : COR_I Exp COR_D
 				| empty empty empty'''
 	pass
-	if p[3] == ']':
-		vars_size.append('@')
+	#if p[3] == ']':
+	vars_size.append('@')
 
 def p_tipo(p):
 	'''Tipo : INT
@@ -106,6 +130,15 @@ def p_tipo(p):
 			| VOID'''
 	pass
 	vars_types.append(p[1])
+	#print(vars_types)
+	
+def p_tipo2(p):
+	'''Tipo2 : INT
+			| FLOAT
+			| CHAR
+			| VOID'''
+	pass
+	procs_types.append(p[1])
 	#print(vars_types)
 
 def p_mainprogram(p):
@@ -230,23 +263,57 @@ def p_lecturaa(p):
 				| empty '''
 
 def p_funcion(p):
-	'''Funcion : FUNCTION Tipo ID FuncionA'''
+	'''Funcion : FUNCTION Tipo2 ID FuncionA'''
 	pass
-	#tipo = procs_types.pop()
-	#x.procs = x.add_procs_to_dict(p[3],tipo, 'void', {})
+	#p.pprint(x.procs)
+	tipo = procs_types.pop()							#Se saca el tipo de procedimiento de la lista de tipos
+	#var_dict = var_brackList.pop()
+	var_dict = {}
+	#for c in range(len(var_brackList)):
+	#	var_dict.update(var_brackList.pop())
+	var_dummyBrackList = var_brackList
+	for c in var_dummyBrackList:
+		z = var_brackList.pop()
+		if z == '@':
+			break
+		else:
+			var_dict.update(z)
+	x.procs.update(x.add_procs_to_dict(p[3],tipo, 'void', var_dict)) #se actualiza el diccionario de procedimientos
+	var_dict = {}
+	#print(var_dict)
+	#pp.pprint(var_dict)
+	#pp.pprint(x.procs)
+
 	
 def p_funciona(p):
-	'''FuncionA : PAR_I Params PAR_D Bloque'''
-
-def p_params(p):
-	'''Params : Tipo ID Params
-			   | empty '''
-	#pass
-	#x1 = vars_types.pop()
-	#id1 = p[2]
-	#ids.enqueue(p[2])
-	#if ids.size() > 0:		#Si encuentra que existe un id, significa que hay que agregarlo a la tabla de variables	
+	'''FuncionA : PAR_I Params3 Params PAR_D  Bloque'''
+	print(var_brackList)
 	
+def p_params3(p):
+	'''Params3 : empty '''
+	var_brackList.append('@') # Se anade un delimitador al principio de cada funcion, para saber que parametros
+	
+def p_params(p):
+	'''Params : Tipo ID Params2
+			   | empty empty empty '''
+	if(p[2] != None):
+		if (ids.vars_exists_in_list(p[2])):
+			vars_types.pop()
+		else:
+			ids.enqueue(p[2])
+			#print(var_types)
+			if ids.size() > 0:	#Si encuentra que existe un id, significa que hay que agregarlo a la tabla de variables
+				#print(vars_types)
+				tipo = vars_types.pop()	#obtiene el tipo de la lista de de tipos
+				identificador = ids.dequeue()
+				x.var = x.add_vars_to_dict(tipo,None, None)	#Se manda llamar el proceso de agregar variable al dict y lo guarda en el objeto
+				#print(identificador)
+				#var_dict.update({p[2]: x.var})
+				var_brackList.append({p[2]: x.var})
+
+def p_params2(p):
+	'''Params2 : COMA Params
+			   | empty empty '''
 
 
 def p_llamada(p):

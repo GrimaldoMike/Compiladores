@@ -17,6 +17,7 @@ class Semantics(object):
 
     # Agrega nueva variable al diccionario de variables
     def add_vars_to_dict(self, vtipo, vsize_1, vsize_2):
+        var_dict = {}
         var_dict = {
             #'Nombre' : vid,
             'Tipo' : vtipo,

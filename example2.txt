@@ -1,0 +1,8 @@
+juego Juego_A :
+	var x [1][2] : int, y[3][4]: char, z[10][11]: float;
+
+
+main (){
+
+ output ( "que tal chavo" );
+}
