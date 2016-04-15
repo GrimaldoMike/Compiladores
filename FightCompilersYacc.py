@@ -8,8 +8,9 @@ import sys
 import pprint
 import FightCompilersLex
 #import FightCompilersSemantics
-from FightCompilersSemantics import Semantics
+from FightCompilersSemantics import Semantics, semantics_cube
 from Queue import Queue
+from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo
 
 tokens = FightCompilersLex.tokens
 
@@ -27,7 +28,10 @@ procs_types = []	#Lista de elementos que guarda los tipos de procedimientos
 
 var_brackList = []
 
-
+PilaO = [] #Pila de operandos '5'
+POper = [] #Pila de operadores '+' '-' '*' '/'
+PTipos = [] #Pila que guarda los tipos e operandos
+PSaltos = [] #Pila que guarda los saltos pendientes para la funcion rellenar_Cuadruplo
 
 
 # Parsing Rules
@@ -35,7 +39,6 @@ def p_juego(p):
 	'''Juego : JUEGO ID DOSP JuegoA JuegoB MainProgram'''
 	x.current_fid = p[2]
 	pass
-	
 	#var_brackList = [4, 5 ,6] 
 	#var_brackList[0] = 4
 	#len(var_brackList) = 3
@@ -47,11 +50,10 @@ def p_juego(p):
 			var_dict.update(z)
 	x.procs.update(x.add_procs_to_dict(p[2],p[1], 'void', var_dict))
 	#print len(var_brackList)
-	pp.pprint(x.procs)
+	#pp.pprint(x.procs)
 	#print(var_brackList.pop())
 	#print(var_dict)
-
-
+	print(POper)
 
 def p_juegoa(p):
 	'''JuegoA : Vars JuegoA
@@ -183,60 +185,146 @@ def p_expresion(p):
 	'''Expresion : Exp ExpresionA '''
 
 def p_expresiona(p):
-	'''ExpresionA : ExpresionB
+	'''ExpresionA : ExpresionB add_Relacional
 				  | empty'''
 
 def p_expresionb(p):
-	'''ExpresionB : EXP_GT Exp
+	'''ExpresionB : EXP_GT Exp 
 				  | EXP_LT Exp
 				  | EXP_GEQ Exp
 				  | EXP_LEQ Exp
 			  	  | EXP_DEQ Exp
 			  	  | EXP_NEQ Exp'''
+	POper.append(p[1])
+
+def p_add_Relacional(p):
+	'''add_Relacional : empty'''
+	if (POper):
+		tempOPERADOR = POper.pop() #Se obtiene el operador tope de la lista
+		if (tempOPERADOR in relational_operators): # Si el operador es relational_operators, se continua evaluar los operandos
+			operacion_cuadruplos(tempOPERADOR) # se manda llamar la funcion que verifica los cuadruplos en el cubo semantico
+		else:
+			POper.append(tempOPERADOR) # no es un relational_operators
+
 
 def p_exp(p):
-	'''Exp : Termino Exp2'''
-
+	'''Exp : Termino Exp2 add_Term'''
+	
 def p_exp2(p):
 	'''Exp2 : OP_PLUS Exp
 			| OP_MIN Exp
-			| empty '''
+			| empty empty '''
+	if (p[1] == '+' or p[1] == '-'):
+		POper.append(p[1]) #Se agrega el operador  suma/resta a la pila de operadores
+		#print(POper)
+
+def p_addTerm(p):
+	'''add_Term : empty'''
+	if (POper):
+		tempOPERADOR = POper.pop() #Se obtiene el operador tope de la lista
+		if (tempOPERADOR == '+' or tempOPERADOR == '-' ): # Si eloperador es "+" o "-", se continua evaluar los operandos
+			operacion_cuadruplos(tempOPERADOR) # se manda llamar la funcion que verifica los cuadruplos en el cubo semantico
+		else:
+			POper.append(tempOPERADOR) # no es un "+" o "-"
 
 def p_termino(p):
-	'''Termino : Factor Termino2'''
+	'''Termino : Factor Termino2 add_Factor'''
+
+def p_addFactor(p):
+	'''add_Factor : empty'''
+	if (POper):
+		tempOPERADOR = POper.pop() #Se obtiene el operador tope de la lista
+		if (tempOPERADOR == '*' or tempOPERADOR == '/' ): # Si eloperador es "*" o "/", se continua evaluar los operandos
+			operacion_cuadruplos(tempOPERADOR) # se manda llamar la funcion que verifica los cuadruplos en el cubo semantico
+		else:
+			POper.append(tempOPERADOR) # no es un "*" o "/" 
+
 
 def p_termino2(p):
 	'''Termino2 : OP_MULT Termino
 				| OP_DIV Termino
 				| empty '''
+	if (p[1] == '*' or p[1] == '/'):
+		POper.append(p[1])	#Se agrega el operador multiplicacion/division a la pila de operadores
+		#print(POper)
 
 def p_factor(p):
-	'''Factor : PAR_I Expresion PAR_D 
+	'''Factor : PAR_I Expresion PAR_D Factor3
 			  | Factor2 VarCte
 			  | Llamada'''
+#	if p[1] == '(': #agregar fondo falso
+#		PilaO.append('[')
+		
 
 def p_factor2(p):
 	'''Factor2 : OP_PLUS
 			   | OP_MIN
 			   | empty '''
 
-def p_varcte(p):
-	'''VarCte : ID
-			  | CTE_I
-			  | CTE_F
-		  	  | TRUE
-		  	  | FALSE'''
-	pass
-	vars_size.append(p[1])
-	#print(vars_size)
+def p_factor3(p):
+	''' Factor3 : '''
+	#quitar fondo falso
+#	PilaO.pop()
 
+def p_varcte(p):
+	'''VarCte : empty ID
+			  | Add_INT_TYPE CTE_I 
+			  | Add_FLOAT_TYPE CTE_F
+		  	  | Add_BOOLT_TYPE TRUE
+		  	  | Add_BOOLF_TYPE FALSE'''
+	pass
+	vars_size.append(p[2])
+	PilaO.append(p[2])
+#	if  PTipos:
+#		print (PTipos)
+
+	
+def p_addinttype(p):
+	'''Add_INT_TYPE : '''
+	PTipos.append("int")
+
+def p_addfloattype(p):
+	'''Add_FLOAT_TYPE : '''
+	PTipos.append("float")
+
+def p_addboolttype(p):
+	'''Add_BOOLT_TYPE : '''
+	PTipos.append("true")
+
+def p_addboolftype(p):
+	'''Add_BOOLF_TYPE : '''
+	PTipos.append("false")
 
 def p_condicion(p):
-	'''Condicion : IF PAR_I Expresion PAR_D Bloque CondicionA'''
+	'''Condicion : IF PAR_I Expresion PAR_D add_IF_1 Bloque CondicionA add_IF_3'''
+
+def p_add_If_1(p):
+	'''add_IF_1 : empty '''
+	if(PTipos):
+		tempTIPOS = PTipos.pop() #Se obtiene el tipo del tope de la lista de tipos
+		if (tempTIPOS == 'bool' ): # Si el tipo es es booleano, se continua
+			tempOPERAND1 = PilaO.pop()
+			resultado_quadruple = add_quadruple('GOTOF', tempOPERAND1, -1, -1, -1, 0) #se genera cuadruplos
+			PSaltos.append(resultado_quadruple) #se devuelve el operando a la pila de operadores
+	else:
+		print ('No se puede hacer la operacion con los tipos: {0} y {1}'.format(tempTIPOS, 'bool'))
+		exit(1)
 
 def p_condiciona(p):
-	'''CondicionA : ELSE Bloque
+	'''CondicionA : ELSE add_IF_2 Bloque
 				  | empty '''
+
+def p_add_if_2(p):
+	'''add_IF_2 : empty '''
+	if (PSaltos):
+		resultado_quadruple = add_quadruple('GOTO', -1, -1, -1, -1, 0) #se genera cuadruplos GOTO, no tiene operandos nulos y una casilla vacia
+		rellenar_cuadruplo(PSaltos.pop())
+		PSaltos.append(resultado_quadruple)  # metemos el contador -1 a la pila de psaltos
+
+def p_add_if_3(p):
+	'''add_IF_3 : empty '''
+	if (PSaltos):
+		rellenar_cuadruplo(PSaltos.pop())  # Sesaca el fin de PSaltos y luego se rellena con cont
 
 def p_escritura(p):
 	'''Escritura : OUTPUT PAR_I Escritura2'''
@@ -266,7 +354,7 @@ def p_funcion(p):
 	'''Funcion : FUNCTION Tipo2 ID FuncionA'''
 	pass
 	#p.pprint(x.procs)
-	tipo = procs_types.pop()							#Se saca el tipo de procedimiento de la lista de tipos
+	tipo = procs_types.pop()	#Se saca el tipo de procedimiento de la lista de tipos
 	#var_dict = var_brackList.pop()
 	var_dict = {}
 	#for c in range(len(var_brackList)):
@@ -287,7 +375,7 @@ def p_funcion(p):
 	
 def p_funciona(p):
 	'''FuncionA : PAR_I Params3 Params PAR_D  Bloque'''
-	print(var_brackList)
+	#print(var_brackList)
 	
 def p_params3(p):
 	'''Params3 : empty '''
@@ -342,8 +430,34 @@ def p_regresa(p):
 	''' Regresa : RETURN Expresion '''
 
 def p_loopwhile(p):
-	''' LoopWhile : WHILE LLAVE_D Expresion LLAVE_I  Bloque '''
+	''' LoopWhile : WHILE add_While_1 LLAVE_D Expresion LLAVE_I add_While_2 Bloque add_While_3 '''
+	
+def p_add_While_1(p):
+	'''add_While_1 : empty '''
+	PSaltos.append(get_count_cuadruplos)  # meter cont en PSaltos
+	
+def p_add_While_2(p):
+	'''add_While_2 : empty '''
+	aux = PTipos.pop()
+	if aux == 'true' or aux == 'false' or aux == 'bool':
+		tempOPERAND = PilaO.pop()
+		resultado_quadruple = add_quadruple('GOTOF', tempOPERAND, -1, -1, -1, 0) #se genera cuadruplos
+		PSaltos.append(resultado_quadruple)
+	else:
+		#tronarlo
+		print ('No se puede hacer la operacion con los tipos: {0} y {1}'.format(aux, 'bool'))
+		exit(1)
 
+def p_add_While_3(p):
+	'''add_While_3 : empty '''
+	if (PSaltos):
+		falso = PSaltos.pop()
+		retorno = PSaltos.pop()
+		add_quadruple('GOTO', -1, -1, -1, -1, retorno) #se genera cuadruplos GOTO, no tiene operandos nulos y una casilla vacia
+		rellenar_cuadruplo(falso)
+	#PSaltos.append(get_count_cuadruplos)  # meter cont en PSaltos
+
+			
 def p_loopfor(p):
 	''' LoopFor : FOR LLAVE_D Asignacion PCOMA Expresion PCOMA Expresion LLAVE_I Bloque '''
 
@@ -449,6 +563,26 @@ def p_agarre(p):
 
 def p_empty(p):
 	''' empty : '''
+
+def operacion_cuadruplos(tempOPERADOR): 
+    tempTIPO2 = PTipos.pop()
+    tempTIPO1 = PTipos.pop()
+    if tempOPERADOR in relational_operators:
+    	tempOPERADOR = 'comp'
+    elif tempOPERADOR in logical_operators:
+    	tempOPERADOR = 'log'
+    resultadoTIPO = check_operation(tempTIPO1,tempOPERADOR,tempTIPO2) # Se manda llamar el cubo semantico
+    if (resultadoTIPO != 'error'): 
+        tempOPERAND2 = PilaO.pop()
+        tempOPERAND1 =  PilaO.pop()
+        resultado_quadruple = add_quadruple(tempOPERADOR, tempOPERAND1, tempTIPO1, tempOPERAND2, tempTIPO2, 0) #se genera cuadruplos
+        PilaO.append(resultado_quadruple)	#se devuelve el operando a la pila de operadores
+        PTipos.append(resultadoTIPO)		#se devuelve el tipo a la pila de tipos
+    else:
+        #tronarlo
+        print ('No se puede hacer la operacion con los tipos: {0}, {1}, {2}'.format(tempTIPO1, tempOPERADOR, tempTIPO2))
+        exit(1)
+
 
 def p_error(p):
 	print ("<---Syntax error--->")
