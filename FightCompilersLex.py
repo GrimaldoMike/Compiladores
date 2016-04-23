@@ -50,8 +50,7 @@ t_COR_D = r'\]'
 t_PCOMA = r';'
 t_COMA = r','
 t_DOSP = r':'
-t_COMILLA = r'"'
-t_CTE_STRING = r'[a-zA-Z_][a-zA-Z0-9_]*'
+t_CTE_STRING = r'\"[a-zA-Z_][a-zA-Z0-9_\t\s\n\r\f\v]*\"'
 t_ignore = ' \t\n\r\f\v' #ignorar espacios
 
 # Palabras reservadas
@@ -64,6 +63,8 @@ reservadas = {
 	'else'      : 'ELSE',
     'while'     : 'WHILE',
     'for'       : 'FOR',
+    'to'        : 'TO',
+    'do'        : 'DO',
     'true'      : 'TRUE',
     'false'     : 'FALSE',
     'var'       : 'VAR',

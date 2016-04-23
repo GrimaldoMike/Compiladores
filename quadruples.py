@@ -42,31 +42,45 @@ def check_operation(type1, operator,  type2):
 
 def get_count_cuadruplos():
     return count_cuadruplos
+
+def get_cuadruplos():
+    return quadruples
     
 def rellenar_cuadruplo(saltos):
-    quadruples[saltos][3] = count_cuadruplos+1  # Se busca el numero de cuadruplo enviado, en la posicion 4 (sub 3) y se inserta el contador actual
+    quadruples[saltos][3] = count_cuadruplos  # Se busca el numero de cuadruplo enviado, en la posicion 4 (sub 3) y se inserta el contador actual
     #print(quadruples[saltos])  # Se busca el numero de cuadruplo enviado, en la posicion 4 (sub 3) y se inserta el contador actual
 
 #def add_quadruple(operator, op1, type1,  op2, type2, mem_temps, mem_global_temps, modIndex=0):
 def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     global count_cuadruplos
+    count_cuadruplos += 1
     #print current['scope'], operator, op1, type1, op2 ,type2
 
     #result_type = check_operation(type1, operator, type2)
 
     if operator is '=':
         quadruples.append( [operator, op2, modIndex, op1] )
-        return op1
+        return op2
     elif operator in relational_operators:
         quadruples.append( [operator, op2, modIndex, op1] )
         return op1
     elif operator == 'GOTOF':
-        quadruples.append( [operator, op1, op2, -1] )  
+        quadruples.append( [operator, op1, op2, -1] ) 
         return count_cuadruplos
     elif operator == 'GOTO':
-        quadruples.append( [operator, -1, -1, -1] )
+        #print ("op1: ")
+        #print (op1)
+        quadruples.append( [operator, -1, -1, op1] )
         return count_cuadruplos
-
+    elif operator == 'OUTPUT':
+        quadruples.append( [operator, -1, -1, op1] )
+        return op1
+    elif operator == 'INPUT':
+        quadruples.append( [operator, -1, -1, op1] )
+        return op1
+    elif operator == 'RETURN':
+        quadruples.append( [operator, type1, -1, op1] )
+        return op1
     temp = 0
     
     if operator is '+':
@@ -81,11 +95,10 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     if operator is not '=':
         quadruples.append( [operator, op1, op2, temp] )
 
-    print("-----Inicia cuadruplos----")
-    print (quadruples)
-    print("-----Termina cuadruplos----")
-    count_cuadruplos += 1
-    print(count_cuadruplos)
+    #print("-----Inicia cuadruplos----")
+    #print (quadruples)
+    #print("-----Termina cuadruplos----")
+    #print(count_cuadruplos)
     return temp
     #else:
     #    quadruples.append( [operator, op1, op2, 1000+offset] )

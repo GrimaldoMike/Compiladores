@@ -10,7 +10,7 @@ import FightCompilersLex
 #import FightCompilersSemantics
 from FightCompilersSemantics import Semantics, semantics_cube
 from Queue import Queue
-from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo
+from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo, get_cuadruplos
 
 tokens = FightCompilersLex.tokens
 
@@ -21,12 +21,17 @@ ids = Queue()
 var_dict = {}
 vars_values = []	#Lista de elementos que guarda el valor de variables
 vars_types = []		#Lista de elementos que guarda los tipos de variables
-vars_size = []		#Lista de elementos que guarda el tamano de variables
+var_size = []		#Lista de elementos que guarda el tamano de variables
 procs_names = []	#Lista de elementos que guarda el nombre de procedimientos
 procs_values = []	#Lista de elementos que guarda el valor de procedimientos
 procs_types = []	#Lista de elementos que guarda los tipos de procedimientos
+local_bracketlist = [] #Lista que tienen los diccionarios de variables
+var_brackList = []  #Lista que tienen los diccionarios de variables
 
-var_brackList = []
+var_brackList2 = {  #Lista que tienen los diccionarios de variables
+	'global' : {},
+	'local'  : {}
+}
 
 PilaO = [] #Pila de operandos '5'
 POper = [] #Pila de operadores '+' '-' '*' '/'
@@ -38,22 +43,30 @@ PSaltos = [] #Pila que guarda los saltos pendientes para la funcion rellenar_Cua
 def p_juego(p):
 	'''Juego : JUEGO ID DOSP JuegoA JuegoB MainProgram'''
 	x.current_fid = p[2]
-	pass
-	#var_brackList = [4, 5 ,6] 
-	#var_brackList[0] = 4
-	#len(var_brackList) = 3
-	for c in range(len(var_brackList)):
-		z = var_brackList.pop()
-		if (z == '@'):
-			pass
-		else:
-			var_dict.update(z)
-	x.procs.update(x.add_procs_to_dict(p[2],p[1], 'void', var_dict))
-	#print len(var_brackList)
-	#pp.pprint(x.procs)
-	#print(var_brackList.pop())
-	#print(var_dict)
-	print(POper)
+	if x.current_fid in x.procs.keys():
+		print ('Procedimiento {0} ya existe en el diccionario'.format(p[2]))
+		exit(1)
+	else:
+		pass
+		#var_brackList = [4, 5 ,6]
+		#var_brackList[0] = 4
+		#len(var_brackList) = 3
+		for c in range(len(var_brackList)):
+			z = var_brackList.pop()
+			if (z == '@'):
+				pass
+			else:
+				var_dict.update(z)
+		x.procs.update(x.add_procs_to_dict(p[2],p[1], 'void', var_dict))
+		#print len(var_brackList)
+		#pp.pprint(x.procs)
+		#print(var_brackList.pop())
+		#print(var_dict)
+		#print(POper)
+		#print("Pila de saltos: ")	
+		#print(PSaltos)	
+		pp.pprint(get_cuadruplos())
+		print(PilaO)
 
 def p_juegoa(p):
 	'''JuegoA : Vars JuegoA
@@ -61,6 +74,7 @@ def p_juegoa(p):
 
 def p_juegob(p):
 	'''JuegoB : Funcion JuegoB 
+			  | Character JuegoB 
 			  | empty'''
 
 def p_vars(p):
@@ -68,33 +82,34 @@ def p_vars(p):
 
 def p_vars2(p):
 	'''Vars2 : ID COR_I Exp COR_D VarSize DOSP Tipo Vars3 '''
-	pass
-	#print(vars_size)
-	if (ids.vars_exists_in_list((p[1]))):
+	#print(var_brackList.keys())
+	if (vars_exists_in_list(p[1])):
+	#if p[1] in var_brackList.keys():
 		vars_types.pop()
 		#vars_values.pop()
-		
 		#['4', '@', 5, '@']                                                                                                         
-		poptemp = vars_size.pop() 
-		if (poptemp != "@") and not vars_size:	#Si existe mas de 1 elemento en la lista de tamano de variables obtiene 2 elementos
-			poptemp = vars_size.pop()
+		poptemp = PilaO.pop() 
+		if (poptemp != "@") and not PilaO:	#Si existe mas de 1 elemento en la lista de tamano de variables obtiene 2 elementos
+			poptemp = PilaO.pop()
+		print ('Variable "{0}" ya existe en el diccionario'.format(p[1]))
+		exit(1)
 	else:
 		ids.enqueue(p[1])
 		if ids.size() > 0:		#Si encuentra que existe un id, significa que hay que agregarlo a la tabla de variables
 			tipo = vars_types.pop()	#obtiene el tipo de la lista de de tipos
 			#Aqui empieza la validacion  de VARSIZE
-			if (vars_size):		#si la lista no esta vacia
-				vars_size.pop()				#siempre hay un @ antes de 1 numero, asi que se saca
-				poptemp = vars_size.pop()	#se saca el primer valor despues del @
+			if (PilaO):		#si la lista no esta vacia
+				PilaO.pop()				#siempre hay un @ antes de 1 numero, asi que se saca
+				poptemp = PilaO.pop()	#se saca el primer valor despues del @
 				sizes2 = poptemp			#se guarda el primer valor como sizes2, por si la lista no esta vacia
-				if (vars_size):				#si la lista no esta vacia
-					poptemp = vars_size.pop()	#se saca el segundo valor 
+				if (PilaO):				#si la lista no esta vacia
+					poptemp = PilaO.pop()	#se saca el segundo valor 
 					if(poptemp != '@'):		#se analiza el segundo valor, si no es @ se guarda como sizes1
 						sizes1 = poptemp
 					else:					#si es @ se devuelve a la lista
 						sizes1 = sizes2		#sizes1 es igual a sizes2, porque ya sabems que no hay un segundo varsize
 						sizes2 = None		#
-						vars_size.append('@')  #se agrega un @ para que siempre quede un @ antes de un numero
+						PilaO.append('@')  #se agrega un @ para que siempre quede un @ antes de un numero
 				else:					#si la lista esta vacia, significa que es el ultimo elemento. 
 					sizes1 = sizes2		#sizes1 es igual a sizes2, porque ya sabemos que no hay un segundo varsize
 					sizes2 = None
@@ -102,8 +117,7 @@ def p_vars2(p):
 			x.var = x.add_vars_to_dict(tipo,sizes1, sizes2)	#Se manda llamar el proceso de agregar variable al dict y lo guarda en el objeto
 			#var_dict.update({identificador: x.var})
 			var_brackList.append({identificador: x.var})
-
-
+			local_bracketlist.append({identificador: x.var})
 	#print(p[5])
 	#c = 0
 	#for i in p:
@@ -116,14 +130,14 @@ def p_vars3(p):
 			| empty'''
 	pass
 	#if p[1] == ',':
-		#vars_size.append('@')
+		#PilaO.append('@')
 
 def p_varsize(p):
 	'''VarSize : COR_I Exp COR_D
 				| empty empty empty'''
 	pass
 	#if p[3] == ']':
-	vars_size.append('@')
+	PilaO.append('@')
 
 def p_tipo(p):
 	'''Tipo : INT
@@ -155,7 +169,7 @@ def p_estatuto(p):
 				| Lectura PCOMA EstatutoA
 				| Escritura PCOMA EstatutoA
 				| Llamada PCOMA EstatutoA
-				| Character PCOMA EstatutoA
+				| LlamadaPersonaje PCOMA EstatutoA
 				| Regresa PCOMA EstatutoA
 				| LoopWhile PCOMA EstatutoA
 				| LoopFor PCOMA EstatutoA'''
@@ -179,13 +193,25 @@ def p_estatuto2a(p):
 				 | LoopFor PCOMA Estatuto2'''
 				
 def p_asignacion(p):
-	'''Asignacion : ID EXP_EQ Expresion'''
+	'''Asignacion : ID EXP_EQ Expresion '''
+	#print("Variable: ")
+	#print(p[1])
+	#print("Var_brackelist actual: ")
+	#print()
+	if (vars_exists_in_list(p[1])):
+		if(PilaO):
+			operandoTEMPORAL = PilaO.pop()
+			resultado_quadruple = add_quadruple(p[2], p[1], -1, operandoTEMPORAL, -1, 0) #se genera cuadruplos de asignacion
+			PilaO.append(resultado_quadruple)
+	else:
+		print ('Variable "{0}" no se encuentra previamente definida'.format(p[1]))
+		exit(1)			
 
 def p_expresion(p):
 	'''Expresion : Exp ExpresionA '''
 
 def p_expresiona(p):
-	'''ExpresionA : ExpresionB add_Relacional
+	'''ExpresionA : ExpresionB add_Exp
 				  | empty'''
 
 def p_expresionb(p):
@@ -197,8 +223,8 @@ def p_expresionb(p):
 			  	  | EXP_NEQ Exp'''
 	POper.append(p[1])
 
-def p_add_Relacional(p):
-	'''add_Relacional : empty'''
+def p_add_Exp(p):
+	'''add_Exp : empty'''
 	if (POper):
 		tempOPERADOR = POper.pop() #Se obtiene el operador tope de la lista
 		if (tempOPERADOR in relational_operators): # Si el operador es relational_operators, se continua evaluar los operandos
@@ -251,10 +277,18 @@ def p_termino2(p):
 def p_factor(p):
 	'''Factor : PAR_I Expresion PAR_D Factor3
 			  | Factor2 VarCte
-			  | Llamada'''
-#	if p[1] == '(': #agregar fondo falso
-#		PilaO.append('[')
-		
+			  | Llamada empty
+			  | ID Add_ID_TYPE '''
+			  
+def p_Add_ID_TYPE(p):
+	'''Add_ID_TYPE :  empty'''
+	#if (vars_exists_in_list(p[-1])):
+
+	#else:
+	#	print ('Procedimiento {0} ya existe en el diccionario'.format(p[2]))
+	#	exit(1)
+	tipo = vars_return_type(p[-1])
+	PTipos.append(tipo)		
 
 def p_factor2(p):
 	'''Factor2 : OP_PLUS
@@ -266,19 +300,22 @@ def p_factor3(p):
 	#quitar fondo falso
 #	PilaO.pop()
 
-def p_varcte(p):
-	'''VarCte : empty ID
-			  | Add_INT_TYPE CTE_I 
-			  | Add_FLOAT_TYPE CTE_F
-		  	  | Add_BOOLT_TYPE TRUE
-		  	  | Add_BOOLF_TYPE FALSE'''
+def p_varcte(p): #truena en ID; por que?!
+	'''VarCte : CTE_STRING Add_STRING_TYPE
+			  |  CTE_I Add_INT_TYPE
+			  |  CTE_F Add_FLOAT_TYPE
+		  	  |  TRUE Add_BOOLT_TYPE
+		  	  |  FALSE  Add_BOOLF_TYPE'''
 	pass
-	vars_size.append(p[2])
-	PilaO.append(p[2])
+	PilaO.append(p[1])
 #	if  PTipos:
 #		print (PTipos)
-
 	
+
+def p_Add_STRING_TYPE(p):
+	'''Add_STRING_TYPE :  empty'''
+	PTipos.append("string")
+
 def p_addinttype(p):
 	'''Add_INT_TYPE : '''
 	PTipos.append("int")
@@ -305,10 +342,10 @@ def p_add_If_1(p):
 		if (tempTIPOS == 'bool' ): # Si el tipo es es booleano, se continua
 			tempOPERAND1 = PilaO.pop()
 			resultado_quadruple = add_quadruple('GOTOF', tempOPERAND1, -1, -1, -1, 0) #se genera cuadruplos
-			PSaltos.append(resultado_quadruple) #se devuelve el operando a la pila de operadores
-	else:
-		print ('No se puede hacer la operacion con los tipos: {0} y {1}'.format(tempTIPOS, 'bool'))
-		exit(1)
+			PSaltos.append(resultado_quadruple -1) #se devuelve el operando a la pila de operadores
+		else:
+			print ('No se puede hacer la operacion con los tipos: {0} y {1}'.format(tempTIPOS, 'bool'))
+			exit(1)
 
 def p_condiciona(p):
 	'''CondicionA : ELSE add_IF_2 Bloque
@@ -319,7 +356,7 @@ def p_add_if_2(p):
 	if (PSaltos):
 		resultado_quadruple = add_quadruple('GOTO', -1, -1, -1, -1, 0) #se genera cuadruplos GOTO, no tiene operandos nulos y una casilla vacia
 		rellenar_cuadruplo(PSaltos.pop())
-		PSaltos.append(resultado_quadruple)  # metemos el contador -1 a la pila de psaltos
+		PSaltos.append(resultado_quadruple -1)  # metemos el contador -1 a la pila de psaltos
 
 def p_add_if_3(p):
 	'''add_IF_3 : empty '''
@@ -327,50 +364,64 @@ def p_add_if_3(p):
 		rellenar_cuadruplo(PSaltos.pop())  # Sesaca el fin de PSaltos y luego se rellena con cont
 
 def p_escritura(p):
-	'''Escritura : OUTPUT PAR_I Escritura2'''
+	'''Escritura : OUTPUT PAR_I Escritura2 '''
 
 def p_escritura2(p):
-	'''Escritura2 :  Expresion Escritura3
-				  |  COMILLA Escritura4'''
+	'''Escritura2 :  ID add_Escritura Escritura3
+				  |  CTE_STRING add_Escritura Escritura3'''
 
 def p_escritura3(p):
 	'''Escritura3 : PAR_D
 				  | COMA Escritura2'''
 
-
-def p_escritura4(p):
-	'''Escritura4 : ID Escritura4 
-				  | COMILLA Escritura3'''
-				  
+def p_add_Escritura(p):
+	'''add_Escritura : empty'''
+	PilaO.append(p[-1])				# Se otiene el ID directamente y se manda a la pila
+	operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
+	#print(operandoTEMPORAL)
+	add_quadruple('OUTPUT', operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos OUTPUT
 
 def p_lectura(p):
-	'''Lectura : INPUT PAR_I ID LecturaA PAR_D '''
+	'''Lectura : INPUT PAR_I LecturaA PAR_D '''
 
 def p_lecturaa(p):
-	'''LecturaA : ID LecturaA
+	'''LecturaA : ID add_Lectura1 LecturaA
 				| empty '''
+
+def p_add_Lectura1(p):
+	'''add_Lectura1 :  empty'''
+	PilaO.append(p[-1])				# Se otiene el ID directamente y se manda a la pila
+	operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
+	#print(operandoTEMPORAL)
+	add_quadruple('INPUT', operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos INPUT
 
 def p_funcion(p):
 	'''Funcion : FUNCTION Tipo2 ID FuncionA'''
 	pass
-	#p.pprint(x.procs)
-	tipo = procs_types.pop()	#Se saca el tipo de procedimiento de la lista de tipos
-	#var_dict = var_brackList.pop()
-	var_dict = {}
-	#for c in range(len(var_brackList)):
-	#	var_dict.update(var_brackList.pop())
-	var_dummyBrackList = var_brackList
-	for c in var_dummyBrackList:
-		z = var_brackList.pop()
-		if z == '@':
-			break
-		else:
-			var_dict.update(z)
-	x.procs.update(x.add_procs_to_dict(p[3],tipo, 'void', var_dict)) #se actualiza el diccionario de procedimientos
-	var_dict = {}
-	#print(var_dict)
-	#pp.pprint(var_dict)
-	#pp.pprint(x.procs)
+	local_bracketlist = []
+	x.current_fid = p[3]
+	if x.current_fid in x.procs.keys():
+		print ('Procedimiento "{0}" esta duplicdo y ya existe en el diccionario.'.format(p[3]))
+		exit(1)
+	else:
+		#p.pprint(x.procs)
+		tipo = procs_types.pop()	#Se saca el tipo de procedimiento de la lista de tipos
+		#var_dict = var_brackList.pop()
+		var_dict = {}
+		#for c in range(len(var_brackList)):
+		#	var_dict.update(var_brackList.pop())
+		var_dummyBrackList = var_brackList
+		for c in var_dummyBrackList:
+			z = var_brackList.pop()
+			if z == '@':
+				break
+			else:
+				var_dict.update(z)
+		x.procs.update(x.add_procs_to_dict(p[3],tipo, 'void', var_dict)) #se actualiza el diccionario de procedimientos
+		var_dict = {}
+		#print(var_dict)
+		#pp.pprint(var_dict)
+		#pp.pprint(x.procs)
 
 	
 def p_funciona(p):
@@ -385,8 +436,11 @@ def p_params(p):
 	'''Params : Tipo ID Params2
 			   | empty empty empty '''
 	if(p[2] != None):
-		if (ids.vars_exists_in_list(p[2])):
+		if (vars_exists_in_list(p[2])):
+		#if p[1] in var_brackList.keys():
 			vars_types.pop()
+			print ('Variable "{0}" ya existe en el diccionario'.format(p[2]))
+			exit(1)
 		else:
 			ids.enqueue(p[2])
 			#print(var_types)
@@ -403,7 +457,6 @@ def p_params2(p):
 	'''Params2 : COMA Params
 			   | empty empty '''
 
-
 def p_llamada(p):
 	'''Llamada : ID PAR_I Llamada2 PAR_D  '''
 
@@ -416,25 +469,48 @@ def p_llamada3(p):
 			 	| empty '''
 
 def p_character(p):
-	''' Character : PERSONAJE ID LLAVE_I CharacterB Archetype Estatuto2 LLAVE_D CharacterA '''
+	''' Character : PERSONAJE ID LLAVE_I CharacterA Archetype Estatuto2 LLAVE_D '''
 
 def p_charactera(p):
-	''' CharacterA :  PERSONAJE ID LLAVE_I CharacterB Archetype Estatuto2 LLAVE_D CharacterA 
+	''' CharacterA : FVarsAsignacion 
 			| empty '''
 
-def p_characterb(p):
-	''' CharacterB : FVarsAsignacion 
-			| empty '''
+def p_llamadaPersonaje(p):
+	'''LlamadaPersonaje : ID PAR_I LlamadaPersonaje2 PAR_D  '''
+
+def p_llamadaPersonaje2(p):
+	'''LlamadaPersonaje2 : Expresion LlamadaPersonaje3
+				| empty '''
+
+def p_llamadaPersonaje3(p):
+	'''LlamadaPersonaje3 : COMA Expresion LlamadaPersonaje3
+			 	| empty '''
 
 def p_regresa(p):
-	''' Regresa : RETURN Expresion '''
+	''' Regresa : RETURN Regresa2 add_Regresa'''
+
+def p_regresa2(p):
+	''' Regresa2 : Expresion empty
+				 | ID add_ID '''
+
+def p_add_ID(p):
+	''' add_ID : empty'''
+	PilaO.append(p[-1])
+
+def p_add_Regresa(p):
+	''' add_Regresa : empty '''
+	if(PilaO):
+		tipoTEMPORAL = PTipos.pop()
+		operandoTEMPORAL = PilaO.pop()
+		#print(operandoTEMPORAL)
+		add_quadruple('RETURN', operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos REGRESA
 
 def p_loopwhile(p):
-	''' LoopWhile : WHILE add_While_1 LLAVE_D Expresion LLAVE_I add_While_2 Bloque add_While_3 '''
+	''' LoopWhile : WHILE add_While_1 PAR_I Expresion PAR_D add_While_2 Bloque add_While_3 '''
 	
 def p_add_While_1(p):
 	'''add_While_1 : empty '''
-	PSaltos.append(get_count_cuadruplos)  # meter cont en PSaltos
+	PSaltos.append(get_count_cuadruplos())  # meter cont en PSaltos
 	
 def p_add_While_2(p):
 	'''add_While_2 : empty '''
@@ -442,7 +518,7 @@ def p_add_While_2(p):
 	if aux == 'true' or aux == 'false' or aux == 'bool':
 		tempOPERAND = PilaO.pop()
 		resultado_quadruple = add_quadruple('GOTOF', tempOPERAND, -1, -1, -1, 0) #se genera cuadruplos
-		PSaltos.append(resultado_quadruple)
+		PSaltos.append(resultado_quadruple - 1)
 	else:
 		#tronarlo
 		print ('No se puede hacer la operacion con los tipos: {0} y {1}'.format(aux, 'bool'))
@@ -453,13 +529,32 @@ def p_add_While_3(p):
 	if (PSaltos):
 		falso = PSaltos.pop()
 		retorno = PSaltos.pop()
-		add_quadruple('GOTO', -1, -1, -1, -1, retorno) #se genera cuadruplos GOTO, no tiene operandos nulos y una casilla vacia
+		add_quadruple('GOTO', retorno, -1, -1, -1, 0) #se genera cuadruplos GOTO, no tiene operandos nulos y una casilla vacia
 		rellenar_cuadruplo(falso)
 	#PSaltos.append(get_count_cuadruplos)  # meter cont en PSaltos
 
 			
+#def p_loopfor(p):
+#	''' LoopFor : FOR PAR_I Asignacion PCOMA Expresion add_For_1 PCOMA Expresion add_For_2 PAR_D Bloque add_For_3 '''
 def p_loopfor(p):
-	''' LoopFor : FOR LLAVE_D Asignacion PCOMA Expresion PCOMA Expresion LLAVE_I Bloque '''
+#	''' LoopFor : FOR PAR_I Asignacion PCOMA Expresion PCOMA Expresion PAR_D Bloque '''
+	''' LoopFor : FOR ID add_For_1 EXP_EQ Expresion add_For_2 TO Expresion add_For_3 DO Bloque add_For_4 '''
+	
+	
+
+def p_add_For_1(p):
+	'''add_For_1 : empty '''
+	#PilaO.append(p[-1])  # Guardar el identificador (direccion) en pila de Operandos (PilaO), verificar semantica
+
+def p_add_For_2(p):
+	'''add_For_2 : empty '''
+
+def p_add_For_3(p):
+	'''add_For_3 : empty '''
+
+def p_add_For_4(p):
+	'''add_For_4 : empty '''
+
 
 def p_fvarasignacion(p):
 	''' FVarsAsignacion : LIFE EXP_EQ Exp FVarsAsignacionA
@@ -563,6 +658,25 @@ def p_agarre(p):
 
 def p_empty(p):
 	''' empty : '''
+
+def vars_exists_in_list(v_id):
+	#print (v_id)
+	#print(var_brackList) for key in var_bracklist[v_id]
+	for y in var_brackList:
+		#if y == v_id:
+		if v_id in y:
+			#print(y)
+			return True
+
+def vars_return_type(v_id):
+	#print("si imprimio")
+	#print (v_id)
+	for y in var_brackList:
+		#print (y [ v_id ][ 'Tipo' ])
+		#if y == v_id:
+		#print (y)
+		if v_id in y:
+			return y[v_id]['Tipo']
 
 def operacion_cuadruplos(tempOPERADOR): 
     tempTIPO2 = PTipos.pop()

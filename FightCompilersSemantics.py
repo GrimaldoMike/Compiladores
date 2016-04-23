@@ -1,5 +1,16 @@
 class Semantics(object):
     
+    
+    errors = {
+        'PARAMETER_LENGTH_MISMATCH': 'Function {0} expects {1} parameters and received {2} parameters at line: {3} ',
+        'REPEATED_DECLARATION': 'Repeated declaration of variable {0} found at line: {1} ',
+        'REPEATED_FUNC_DECLARATION': 'Repeated declaration of function {0} found at line: {1} ',
+        'UNDECLARED_VARIABLE': 'Undeclared variable {0} found at line: {1} ',
+        'UNDECLARED_FUNCTION': 'Undeclared function {0} found at line: {1} ',
+        'STACKOVERFLOW': 'Stackoverflow, the program is too big.',
+        'PARAMETER_TYPE_MISMATCH': 'Function {0}, expected type {1} and received type {2} in position {3}',
+        'INVALID_ARRAY_DECLARATION': 'Variable {0} of type array in line {1}, should be declared with constant dimensions.'
+    }
     def __init__(self):
         self.procs = {} #Diccionario de procedimientos
         self.var = {}   #Diccionario que guarda la "tabla" de variables. Este va dentro de procs con id = var_dict
@@ -28,14 +39,18 @@ class Semantics(object):
         
     #Revisa si existe el id en el diccionario de procedimientos
     def proc_exists_in_dict(self, fid):
-        if fid in self.procs:
-            return True
-        else:
-            return False
+     if fid in self.procs:
+      return True
+     else:
+      return False
 
     #Revisa si existe el id en el diccionario de variables
-    def var_exists_in_dict(self, vid):
-        return True
+     def var_exists_in_dict(self, vid):
+      if vid in self.procs.keys():
+       return True
+      else:
+       return False
+      
 
 semantics_cube = {
     # logical operators
