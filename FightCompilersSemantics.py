@@ -21,7 +21,7 @@ class Semantics(object):
         proc_dict = {}
         proc_dict[fid] = {
         'Tipo': ftipo,
-        'Params': fparams,
+        '#Params': fparams,
         'Var_Table': fdict
         }
         return proc_dict

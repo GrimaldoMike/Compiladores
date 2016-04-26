@@ -28,6 +28,9 @@ procs_types = []	#Lista de elementos que guarda los tipos de procedimientos
 local_bracketlist = [] #Lista que tienen los diccionarios de variables
 var_brackList = []  #Lista que tienen los diccionarios de variables
 
+contador_parametros = [0] #contador que guarda el numero de parametros por funcion
+contador_varsGlobales = [0] #contador que guarda el numero de variables globales
+
 var_brackList2 = {  #Lista que tienen los diccionarios de variables
 	'global' : {},
 	'local'  : {}
@@ -41,7 +44,7 @@ PSaltos = [] #Pila que guarda los saltos pendientes para la funcion rellenar_Cua
 
 # Parsing Rules
 def p_juego(p):
-	'''Juego : JUEGO ID DOSP JuegoA JuegoB MainProgram'''
+	'''Juego : JUEGO ID DOSP JuegoA add_Juego_1 JuegoB MainProgram'''
 	x.current_fid = p[2]
 	if x.current_fid in x.procs.keys():
 		print ('Procedimiento {0} ya existe en el diccionario'.format(p[2]))
@@ -57,7 +60,9 @@ def p_juego(p):
 				pass
 			else:
 				var_dict.update(z)
-		x.procs.update(x.add_procs_to_dict(p[2],p[1], 'void', var_dict))
+		count = contador_varsGlobales.pop() # Se otiene el contador de parametros y se manda al dir. de procs.
+		contador_varsGlobales.append(0)	#Se vacia el listado y se reinicializa en 0 parametros				
+		x.procs.update(x.add_procs_to_dict(p[2],p[1], count, var_dict))
 		#print len(var_brackList)
 		#pp.pprint(x.procs)
 		#print(var_brackList.pop())
@@ -66,7 +71,7 @@ def p_juego(p):
 		#print("Pila de saltos: ")	
 		#print(PSaltos)	
 		pp.pprint(get_cuadruplos())
-		print(PilaO)
+		#print(PilaO)
 
 def p_juegoa(p):
 	'''JuegoA : Vars JuegoA
@@ -76,6 +81,11 @@ def p_juegob(p):
 	'''JuegoB : Funcion JuegoB 
 			  | Character JuegoB 
 			  | empty'''
+
+def p_add_Juego_1(p):
+	'''add_Juego_1 : empty'''
+	resultado_quadruple = add_quadruple('GOTO', -1, -1, -1, -1, 0) #se genera cuadruplos GOTO, no tiene operandos nulos y una casilla vacia
+	PSaltos.append(resultado_quadruple -1)  # metemos el contador -1 a la pila de psaltos
 
 def p_vars(p):
 	'''Vars : VAR Vars2 PCOMA'''
@@ -116,6 +126,8 @@ def p_vars2(p):
 			identificador = ids.dequeue()
 			x.var = x.add_vars_to_dict(tipo,sizes1, sizes2)	#Se manda llamar el proceso de agregar variable al dict y lo guarda en el objeto
 			#var_dict.update({identificador: x.var})
+			count = contador_varsGlobales.pop()  #se obtiene el contador actual de la lista
+			contador_varsGlobales.append(count +1)	# se suma 1 ya que se agrego una variable
 			var_brackList.append({identificador: x.var})
 			local_bracketlist.append({identificador: x.var})
 	#print(p[5])
@@ -158,7 +170,16 @@ def p_tipo2(p):
 	#print(vars_types)
 
 def p_mainprogram(p):
-	'''MainProgram : MAIN PAR_I PAR_D Bloque'''
+	'''MainProgram : MAIN PAR_I PAR_D add_Main_1 Bloque add_Main_2'''
+
+def p_add_Main_1(p):		#funcion que se encarga de rellenar el primer GOTO de los cuadruplos. Se salta las funciones.
+	'''add_Main_1 : empty'''
+	retorno = PSaltos.pop() #obtiene el valor de PSaltos mas auntiguo 
+	rellenar_cuadruplo(retorno)  #rellena el primer cuadruplo con ese valor
+
+def p_add_Main_2(p):
+	'''add_Main_2 : empty'''
+	add_quadruple('END', -1, -1, -1, -1, 0) #se genera cuadrplo de fin de programa
  
 def p_bloque(p):
 	'''Bloque ::= LLAVE_I Estatuto LLAVE_D'''
@@ -396,7 +417,7 @@ def p_add_Lectura1(p):
 	add_quadruple('INPUT', operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos INPUT
 
 def p_funcion(p):
-	'''Funcion : FUNCTION Tipo2 ID FuncionA'''
+	'''Funcion : FUNCTION Tipo2 ID FuncionA add_Funcion_1'''
 	pass
 	local_bracketlist = []
 	x.current_fid = p[3]
@@ -417,7 +438,9 @@ def p_funcion(p):
 				break
 			else:
 				var_dict.update(z)
-		x.procs.update(x.add_procs_to_dict(p[3],tipo, 'void', var_dict)) #se actualiza el diccionario de procedimientos
+		count = contador_parametros.pop() # Se otiene el contador de parametros y se manda al dir. de procs.
+		contador_parametros.append(0)	#Se vacia el listado y se reinicializa en 0 parametros
+		x.procs.update(x.add_procs_to_dict(p[3],tipo, count, var_dict)) #se actualiza el diccionario de procedimientos
 		var_dict = {}
 		#print(var_dict)
 		#pp.pprint(var_dict)
@@ -427,6 +450,10 @@ def p_funcion(p):
 def p_funciona(p):
 	'''FuncionA : PAR_I Params3 Params PAR_D  Bloque'''
 	#print(var_brackList)
+	
+def p_add_Funcion_1(p):
+	'''add_Funcion_1 : empty'''
+	add_quadruple('ENDPROC', -1, -1, -1, -1, 0) #se genera cuadrplo de fin de programa
 	
 def p_params3(p):
 	'''Params3 : empty '''
@@ -442,6 +469,8 @@ def p_params(p):
 			print ('Variable "{0}" ya existe en el diccionario'.format(p[2]))
 			exit(1)
 		else:
+			cont = contador_parametros.pop()
+			contador_parametros.append(cont +1)
 			ids.enqueue(p[2])
 			#print(var_types)
 			if ids.size() > 0:	#Si encuentra que existe un id, significa que hay que agregarlo a la tabla de variables
@@ -449,8 +478,6 @@ def p_params(p):
 				tipo = vars_types.pop()	#obtiene el tipo de la lista de de tipos
 				identificador = ids.dequeue()
 				x.var = x.add_vars_to_dict(tipo,None, None)	#Se manda llamar el proceso de agregar variable al dict y lo guarda en el objeto
-				#print(identificador)
-				#var_dict.update({p[2]: x.var})
 				var_brackList.append({p[2]: x.var})
 
 def p_params2(p):

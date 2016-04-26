@@ -81,6 +81,13 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     elif operator == 'RETURN':
         quadruples.append( [operator, type1, -1, op1] )
         return op1
+    elif operator == 'ENDPROC':
+        quadruples.append( [operator, -1, -1, op1] )
+        return op1
+    elif operator == 'END':
+        quadruples.append( [operator, -1, -1, -1] )
+        return op1
+
     temp = 0
     
     if operator is '+':
