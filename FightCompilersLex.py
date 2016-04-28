@@ -51,7 +51,8 @@ t_PCOMA = r';'
 t_COMA = r','
 t_DOSP = r':'
 t_CTE_STRING = r'\"[a-zA-Z_][a-zA-Z0-9_\t\s\n\r\f\v]*\"'
-t_ignore = ' \t\n\r\f\v' #ignorar espacios
+#t_ignore = ' \t\n\r\f\v' #ignorar espacios nuestro
+t_ignore 	= ' \t\n\r' #ignorar espacios
 
 # Palabras reservadas
 reservadas = {
@@ -82,13 +83,14 @@ reservadas = {
     'comandos'  : 'COMANDOS',
     'input'     : 'INPUT',
     'output'    : 'OUTPUT',
-    'return'    : 'RETURN'
+    'return'    : 'RETURN',
+    'bool'      : 'BOOL'
 }
 
 # Lista de tokens
 
 tokens = [
-    'ID',
+    'ID', 
     'CTE_STRING', 'CTE_I', 'CTE_F', 'COMA', 'PCOMA', 'DOSP','COMILLA',
     'STANDING', 'CROUCHING', 'JUMPING', 'FORWARD', 'BACKWARD', 'QCF', 'QCB', 'SRK', 'BBF', 'DDU', 'SPD', 'PUNCH', 'KICK', 'GRAB',
     'OP_PLUS', 'OP_MIN', 'OP_MULT', 'OP_DIV', 'EXP_EQ', 'EXP_GT', 'EXP_LT', 'EXP_NEQ', 'EXP_GEQ', 'EXP_LEQ', 'EXP_DEQ',

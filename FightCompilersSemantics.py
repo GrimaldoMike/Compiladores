@@ -1,27 +1,17 @@
 class Semantics(object):
     
-    
-    errors = {
-        'PARAMETER_LENGTH_MISMATCH': 'Function {0} expects {1} parameters and received {2} parameters at line: {3} ',
-        'REPEATED_DECLARATION': 'Repeated declaration of variable {0} found at line: {1} ',
-        'REPEATED_FUNC_DECLARATION': 'Repeated declaration of function {0} found at line: {1} ',
-        'UNDECLARED_VARIABLE': 'Undeclared variable {0} found at line: {1} ',
-        'UNDECLARED_FUNCTION': 'Undeclared function {0} found at line: {1} ',
-        'STACKOVERFLOW': 'Stackoverflow, the program is too big.',
-        'PARAMETER_TYPE_MISMATCH': 'Function {0}, expected type {1} and received type {2} in position {3}',
-        'INVALID_ARRAY_DECLARATION': 'Variable {0} of type array in line {1}, should be declared with constant dimensions.'
-    }
     def __init__(self):
         self.procs = {} #Diccionario de procedimientos
         self.var = {}   #Diccionario que guarda la "tabla" de variables. Este va dentro de procs con id = var_dict
         self.current_fid = "" #Guarda el id fe la funcion actual
 
     # Agrega nuevo valor al diccionario de procedimientos
-    def add_procs_to_dict(self, fid, ftipo, fparams, fdict):
+    def add_procs_to_dict(self, fid, ftipo, fparams, fdirI, fdict):
         proc_dict = {}
         proc_dict[fid] = {
         'Tipo': ftipo,
         '#Params': fparams,
+        'DireccionInicio': fdirI,
         'Var_Table': fdict
         }
         return proc_dict

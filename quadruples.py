@@ -10,14 +10,6 @@ relational_operators = set(['<', '>', '<>', '==', '<=', '>='])
 logical_operators = set(['AND', 'OR'])
 ignored_checks = set(['PRINT', 'READ', 'INPUT', 'GOTOF', 'GOTO', 'RETURN', 'PARAMETER', 'ERA', 'GOSUB', 'ENDPROC'])
     
-temps = {
-    'bool': { 'unused': set([]), 'used': set([])},
-    'int': {'unused': set([]), 'used': set([])},
-    'float': {'unused': set([]), 'used': set([])},
-    'char': {'unused': set([]), 'used': set([])},
-    'string': {'unused': set([]), 'used': set([])}
-}
-next_temp = 1    
 
 def check_operation(type1, operator,  type2):
     if operator is '=':
@@ -53,6 +45,7 @@ def rellenar_cuadruplo(saltos):
 #def add_quadruple(operator, op1, type1,  op2, type2, mem_temps, mem_global_temps, modIndex=0):
 def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     global count_cuadruplos
+    global offset
     count_cuadruplos += 1
     #print current['scope'], operator, op1, type1, op2 ,type2
 
@@ -60,16 +53,16 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
 
     if operator is '=':
         quadruples.append( [operator, op2, modIndex, op1] )
+        #   print("Lado derecho es"+op2)
         return op2
     elif operator in relational_operators:
-        quadruples.append( [operator, op2, modIndex, op1] )
+        quadruples.append( [operator, op1, op2, 'temp'+str(offset)] )  #aqui se debe de validar las variables temporales por scope
+        offset += 1
         return op1
     elif operator == 'GOTOF':
         quadruples.append( [operator, op1, op2, -1] ) 
         return count_cuadruplos
     elif operator == 'GOTO':
-        #print ("op1: ")
-        #print (op1)
         quadruples.append( [operator, -1, -1, op1] )
         return count_cuadruplos
     elif operator == 'OUTPUT':
@@ -81,8 +74,17 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     elif operator == 'RETURN':
         quadruples.append( [operator, type1, -1, op1] )
         return op1
+    elif operator == 'ERA':
+        quadruples.append( [operator, -1, -1, op1] )
+        return op1
     elif operator == 'ENDPROC':
         quadruples.append( [operator, -1, -1, op1] )
+        return op1
+    elif operator == 'PARAMETER':
+        quadruples.append( [operator, op1, -1, op2] )
+        return op1
+    elif operator == 'GOSUB':
+        quadruples.append( [operator, op2, -1, op1] )
         return op1
     elif operator == 'END':
         quadruples.append( [operator, -1, -1, -1] )
@@ -90,97 +92,34 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
 
     temp = 0
     
-    if operator is '+':
-        temp = int(op1)+int(op2)
-    elif operator is '-':
-        temp = int(op1)-int(op2)
-    elif operator is '*':
-        temp = int(op1)*int(op2)
-    elif operator is '/':
-        temp = int(op1)/int(op2)
+    # if operator is '+':
+    #     temp = int(op1)+int(op2)
+    # elif operator is '-':
+    #     temp = int(op1)-int(op2)
+    # elif operator is '*':
+    #     temp = int(op1)*int(op2)
+    # elif operator is '/':
+    #     temp = int(op1)/int(op2)
     
     if operator is not '=':
-        quadruples.append( [operator, op1, op2, temp] )
+        quadruples.append( [operator, op1, op2, 'temp'+str(offset)] )
+        offset += 1
+    return ('temp'+str(offset-1))
 
-    #print("-----Inicia cuadruplos----")
-    #print (quadruples)
-    #print("-----Termina cuadruplos----")
-    #print(count_cuadruplos)
-    return temp
-    #else:
-    #    quadruples.append( [operator, op1, op2, 1000+offset] )
-    #    offset += 1
-    #    print(quadruples)
-    # elif operator == 'PRINT':
-    #     quadruples.append( [operator, op2, -1, op1] )
-    # elif operator == 'READ':
-    #     quadruples.append( [operator, -1, -1, op1] )
-    # elif operator == 'GOTOF':
-    #     quadruples.append( [operator, op1, op2, -1] )
-    # elif operator == 'GOTO':
-    #     quadruples.append( [operator, -1, -1, op1] )
-    # elif operator == 'RETURN':
-    #     quadruples.append( [operator, op2, -1, op1] )
-    # elif operator == 'PARAMETER':
-    #     quadruples.append( [operator, op1, -1, op2] )
-    # elif operator == 'ERA':
-    #     quadruples.append( [operator, -1, -1, op1] )
-    # elif operator == 'GOSUB':
-    #     quadruples.append( [operator, op2, -1, op1] )
-    # elif operator == 'ENDPROC':
-    #     quadruples.append( [operator, -1, -1, op1] )
-    # elif operator == 'SHOW':
-    #     quadruples.append( [operator, -1, -1, op1] )
-    # elif operator == 'DECLARE':
-    #     quadruples.append( [operator, op1, -1, op2] )
-    # elif operator == 'VERIFY':
-    #     quadruples.append( [operator, op1, -1, op2] )
 
-    # elif operator == 'ROWOFFSET':
-    #     result_type = type1
-    #     if current['scope'] == 'global':
-    #         temp = get_global_temp(result_type, mem_global_temps)
-    #     else:
-    #         temp = get_temp(result_type, mem_temps)
-
-    #     quadruples.append( ['ROWOFFSET', op1, op2, temp] )
-    #     operands.append( temp )
-    #     types.append(result_type)
-    # elif operator == 'COLUMNOFFSET':
-    #     result_type = type1
-    #     if current['scope'] == 'global':
-    #         temp = get_global_temp(result_type, mem_global_temps)
-    #     else:
-    #         temp = get_temp(result_type, mem_temps)
-
-    #     quadruples.append( ['COLUMNOFFSET', op1, op2, temp] )
-    #     operands.append(temp)
-    #     types.append(result_type)
-    # elif operator == 'SUMDIR':
-    #     result_type = type1
-    #     if current['scope'] == 'global':
-    #         temp = get_global_temp(result_type, mem_global_temps)
-    #     else:
-    #         temp = get_temp(result_type, mem_temps)
-
-    #     quadruples.append( ['SUMDIR', op1, op2, temp] )
-    #     operands.append(str( op1 )+'*'+str( temp ))
-    #     types.append(type1)
-    # else:
-    #     if current['scope'] == 'global':
-    #         temp = get_global_temp(result_type, mem_global_temps)
-    #     else:
-    #         temp = get_temp(result_type, mem_temps)
-
-    #     quadruples.append( [operator, op1, op2, temp] )
-    #     operands.append(temp)
-    #     types.append(result_type)
-
-    # print_quadruples()
-    # print_operators()
-    # print_operands()
-    # if current['scope'] == 'global':
-    #     return_global_temp_operands(op1, type1,  op2, type2)
-    # else:
-    #     if not ( operator == '=' and op1 in temps[type1]['used'] ):
-    #         return_temp_operands(op1, type1,  op2, type2)
+# def assign_mem_value(operator, var_type1, var_type2, scope):
+#     mtype = check_operation(var_type1,operator,var_type2) # Se manda llamar el cubo semantico
+    
+#     if mtype == 'bool':
+#         return memory.add_bool(num)
+#     elif mtype == 'int':
+#         return memory.add_int(num)
+#     elif mtype == 'float':
+#         return memory.add_float(num)
+#     elif mtype == 'char':
+#         return memory.add_char(num)
+#     elif mtype == 'string':
+#         return memory.add_string(num)
+#     else:
+#         print ('Void')
+#     # TODO: write code...
