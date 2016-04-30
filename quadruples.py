@@ -52,9 +52,9 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     #result_type = check_operation(type1, operator, type2)
 
     if operator is '=':
-        quadruples.append( [operator, op1, modIndex, op2] )
+        quadruples.append( [operator, op2, modIndex, op1] )
         #   print("Lado derecho es"+op2)
-        return op2
+        return op1
     elif operator in relational_operators:
         quadruples.append( [operator, op1, op2, 'temp'+str(offset)] )  #aqui se debe de validar las variables temporales por scope
         offset += 1

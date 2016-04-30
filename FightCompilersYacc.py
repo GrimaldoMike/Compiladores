@@ -69,11 +69,8 @@ def p_juego(p):
 	pp.pprint(get_cuadruplos())
 	pp.pprint(x.procsGlobal)
 	pp.pprint(x.procsLocal)
-	print(".................")
-	print("PilaO: ", PilaO)
-	print("POper: ", POper)
-	print("PTipos: ", PTipos)
-		
+	# print(".................")
+
 def p_add_Juego_1(p):
 	'''add_Juego_1 : empty'''
 	if p[-1] in x.procsGlobal.keys():  #se verifica la semantica
@@ -385,7 +382,7 @@ def p_termino2(p):
 def p_factor(p):
 	'''Factor : PAR_I add_Factor_PAR_I Expresion PAR_D add_Factor_PAR_D Factor3
 			  | Factor2 VarCte
-			  | Llamada_Factor add_Llamada_Factor_6 empty
+			  | Llamada_Factor  empty
 			  | ID add_ID_TYPE_1  '''
 			  
 def p_add_Factor_PAR_I(p):
@@ -397,7 +394,7 @@ def p_add_Factor_PAR_D(p):
 	POper.pop()				#Se remueve el fondo falso
 
 def p_add_Llamada_Factor(p):
-	'''Llamada_Factor :  ID add_Llamada_Factor_1 PAR_I Llamada_Factor_2 PAR_D add_Llamada_Factor_5'''
+	'''Llamada_Factor :  ID add_Llamada_Factor_1 PAR_I Llamada_Factor_2 PAR_D add_Llamada_Factor_5 add_Llamada_Factor_6'''
 	#print("Estoy en llamada factor: ", PilaO)
 
 def p_add_Llamada_Factor_1(p):
@@ -480,7 +477,7 @@ def p_add_Llamada_Factor_6(p):
 		#print("Nombre de funciones:")
 		proc_brackList.append(nombre_funcion)
 		#operacion_cuadruplos('=')
-		resultado_quadruple = add_quadruple('=', nombre_funcion, -1, operadorIzquierdo, -1, 0) #se genera cuadruplos
+		resultado_quadruple = add_quadruple('=', operadorIzquierdo, -1, nombre_funcion, -1, 0) #se genera cuadruplos
 		PilaO.append(resultado_quadruple)	#se devuelve el operando a la pila de operadores		
 		#pp.pprint(get_cuadruplos())
 
@@ -495,7 +492,7 @@ def p_add_ID_TYPE_1(p):
 	#	exit(1)
 	nombre = proc_brackList.pop()
 	proc_brackList.append(nombre)
-	print("imprimiendo suma:", nombre)
+	#print("imprimiendo suma:", p[-1])
 	tipo = vars_return_type(nombre, p[-1])
 	#print("Ya imprimi el tipo")
 	#print(tipo)
@@ -527,6 +524,7 @@ def p_varcte(p):
 
 def p_Add_STRING_TYPE(p):
 	'''Add_STRING_TYPE :  empty'''
+	
 	PTipos.append("string")
 
 def p_addinttype(p):
@@ -581,22 +579,31 @@ def p_add_if_3(p):
 def p_escritura(p):
 	'''Escritura : OUTPUT PAR_I Escritura2 '''
 
-# def p_escritura2(p):
-# 	'''Escritura2 :  ID add_Escritura Escritura3
-# 				  |  CTE_STRING add_Escritura Escritura3'''
-
 def p_escritura2(p):
-	'''Escritura2 :  Expresion add_Escritura Escritura3'''
+	'''Escritura2 :  ID add_Escritura1 add_Escritura Escritura3
+ 			  |  CTE_STRING add_Escritura1 add_Escritura Escritura3
+ 			  |  Llamada_Factor add_Escritura Escritura3 '''
+
+#def p_escritura2(p):
+#	'''Escritura2 :  Expresion add_Escritura Escritura3'''
 
 def p_escritura3(p):
 	'''Escritura3 : PAR_D
 				  | COMA Escritura2'''
 
+
+def p_add_Escritura1(p):
+	'''add_Escritura1 : empty'''
+	PilaO.append(p[-1])
+
 def p_add_Escritura(p):
 	'''add_Escritura : empty'''
 	#PilaO.append(p[-1])				# Se otiene el ID directamente y se manda a la pila
+	print("imprimiendo esto: ", PilaO)
+
 	operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
 	#print(operandoTEMPORAL)
+
 	add_quadruple('OUTPUT', operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos OUTPUT
 
 def p_lectura(p):
@@ -1109,17 +1116,18 @@ def vars_return_type(nombre, v_id):
 	#print("printiando aux", aux)
 	for y in aux:
 		if nombre in y:
-			print("entro")
-			print(y)
-			pp.pprint(x.procsLocal[nombre])
-			return x.procsLocal[nombre]['Tipo']
+			#print("entro")
+			#print(y)
+			#print(v_id)
+			#pp.pprint(x.procsLocal[nombre]['Var_Table'][v_id]['Tipo'])
+			return x.procsLocal[nombre]['Var_Table'][v_id]['Tipo']
 	
 	aux = x.procsGlobal.keys()
 	for y in aux:
 		if nombre in y:
-			print("entro")
-			print("El tipo es", x.procsGlobal[nombre]['Tipo'])
-			return x.procsGlobal[nombre]['Tipo']			
+			#print("entro")
+			#print("El tipo es", x.procsGlobal[nombre]['Tipo'])
+			return x.procsGlobal[nombre]['Var_Table'][v_id]['Tipo']
 	return False
 
 
@@ -1131,6 +1139,9 @@ def operacion_cuadruplos(tempOPERADOR):
 		tempOPERADOR = 'comp'
 	elif tempOPERADOR in logical_operators:
 		tempOPERADOR = 'log'
+	#print("PilaO es: ", PilaO)	
+	#print("PTipos es: ", PTipos)	
+	#print("----------------------------")	
 	resultadoTIPO = check_operation(tempTIPO1,operador,tempTIPO2) # Se manda llamar el cubo semantico
 	if (resultadoTIPO != 'error'): 
 		tempOPERAND2 = PilaO.pop()
@@ -1144,7 +1155,7 @@ def operacion_cuadruplos(tempOPERADOR):
 		PTipos.append(resultadoTIPO)		#se devuelve el tipo a la pila de tipos
 	else:
 	    #tronarlo
-	    print ('<---[ERROR_TYPE_MISMATCH][Expresion]; No se puede hacer la operacion con los tipos: {0}, {1}, {2}--->'.format(tempTIPO1, tempOPERADOR, tempTIPO2))
+	    print ('<---[ERROR_TYPE_MISMATCH][Expresion]; No se puede hacer la operacion con los tipos: {0}, {1}, {2}--->'.format(tempTIPO1, operador, tempTIPO2))
 	    exit(1)
 
 

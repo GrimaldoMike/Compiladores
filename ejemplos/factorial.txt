@@ -12,6 +12,7 @@ function int factorial ( int x ) {
         }
         else {
             return factorial(x-1) * x;
+            
         };
     };
 }

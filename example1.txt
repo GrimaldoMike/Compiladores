@@ -18,7 +18,7 @@ function int suma ( float a,  int b ) {
 	};
 	
 	input (vuvuzelas);
-    output (w1,w2,"lmn pmm");
+    output ("w1", "w2");
 
     while (6>4){
         b = 12 * 13 ;
