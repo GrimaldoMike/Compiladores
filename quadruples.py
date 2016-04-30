@@ -52,13 +52,13 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     #result_type = check_operation(type1, operator, type2)
 
     if operator is '=':
-        quadruples.append( [operator, op2, modIndex, op1] )
+        quadruples.append( [operator, op1, modIndex, op2] )
         #   print("Lado derecho es"+op2)
         return op2
     elif operator in relational_operators:
         quadruples.append( [operator, op1, op2, 'temp'+str(offset)] )  #aqui se debe de validar las variables temporales por scope
         offset += 1
-        return op1
+        return ('temp'+str(offset-1))
     elif operator == 'GOTOF':
         quadruples.append( [operator, op1, op2, -1] ) 
         return count_cuadruplos
@@ -84,8 +84,9 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
         quadruples.append( [operator, op1, -1, op2] )
         return op1
     elif operator == 'GOSUB':
-        quadruples.append( [operator, op2, -1, op1] )
-        return op1
+        quadruples.append( [operator, -1, -1, op1] )
+        offset += 1
+        return ('temp'+str(offset-1))
     elif operator == 'END':
         quadruples.append( [operator, -1, -1, -1] )
         return op1

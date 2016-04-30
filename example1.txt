@@ -1,5 +1,5 @@
 juego Juego_A :
-	var x[1][2] : int, y[3][4]: char, z[2][1]: char, m[1]: bool;
+	var x[1][2] : int, y[3][4]: char, z[2][1]: char, m[1]: int;
 
 personaje mike { 
     life = 100;
@@ -8,9 +8,9 @@ personaje mike {
     type = shoto;
     comandos = .st .cr .KM .236 .PM;
 }
-    
 
-function int suma ( float a,  int b, bool f  ) {
+
+function int suma ( float a,  int b ) {
 
     if (5>6){
         b = 2;
@@ -27,23 +27,15 @@ function int suma ( float a,  int b, bool f  ) {
     return b;
 }
 
-function char resta ( float c,  float d ) {
-    
-    if (5>6){
-	c = 5 + 2 * (4/2);
-	};
-	
-	d = 5;
 
-
-}
 
 
 main (){
     
     m = 23;
-    x = suma(90.1 * 2);
+    x = suma(2.4, 90);
     
+
     output( "que tal chavo" );
     output(x);
  

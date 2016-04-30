@@ -1,7 +1,8 @@
 class Semantics(object):
     
     def __init__(self):
-        self.procs = {} #Diccionario de procedimientos
+        self.procsGlobal = {} #Diccionario de procedimientos globales
+        self.procsLocal = {} #Diccionario de procedimientos locales
         self.var = {}   #Diccionario que guarda la "tabla" de variables. Este va dentro de procs con id = var_dict
         self.current_fid = "" #Guarda el id fe la funcion actual
 
