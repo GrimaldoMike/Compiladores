@@ -191,6 +191,7 @@ def p_tipo2(p):
 			| VOID'''
 	pass
 	procs_types.append(p[1])
+	PTipos.append(p[1])
 	#print(vars_types)
 
 def p_mainprogram(p):
@@ -262,7 +263,7 @@ def p_estatuto2a(p):
 				 | LoopFor PCOMA Estatuto2'''
 				
 def p_asignacion(p):
-	'''Asignacion : ID add_Asignacion_1 EXP_EQ add_Asignacion_2 Expresion add_Asignacion_3 '''
+	'''Asignacion : ID add_ID_TYPE_1 EXP_EQ add_Asignacion_2 Expresion add_Asignacion_3 '''
 	#print("Variable: ")
 	#print(p[1])
 	#print("Var_brackelist actual: ")
@@ -277,9 +278,9 @@ def p_asignacion(p):
 	# 	exit(1)	
 
 
-def p_add_Asignacion_1(p):
-	'''add_Asignacion_1 : empty '''
-	PilaO.append(p[-1])
+# def p_add_Asignacion_1(p):
+# 	'''add_Asignacion_1 : empty '''
+# 	PilaO.append(p[-1])
 	
 def p_add_Asignacion_2(p):
 	'''add_Asignacion_2 : empty '''
@@ -295,8 +296,8 @@ def p_add_Asignacion_3(p):
 		operadorAsigna = POper.pop()
 		#tipoDerecho = PilaO.pop()
 		#print('Lado izquierdo "{0}" operador "{1}" Lado derecho "{2}"'.format(operadorIzquierdo, operadorIgual, operadorDerecho))
-		#rint('Lado izquierdo "{0}" Lado derecho "{1}"'.format(operadorIzquierdo, operadorDerecho))
-		#print(PilaO)
+		#print('Lado izquierdo "{0}" Lado derecho "{1}"'.format(operadorIzquierdo, operadorDerecho))
+		#pp.pprint(get_cuadruplos())
 		#print(var_brackList)
 		#if (vars_exists_in_list(operadorIzquierdo)):
 		#pp.pprint(operadorIzquierdo)
@@ -339,15 +340,15 @@ def p_add_Exp(p):
 			POper.append(tempOPERADOR) # no es un relational_operators
 
 def p_exp(p):
-	'''Exp : Termino Exp2 add_Term'''
+	'''Exp : Termino add_Term Exp2 '''
 	
 def p_exp2(p):
-	'''Exp2 : OP_PLUS Exp
-			| OP_MIN Exp
+	'''Exp2 : OP_PLUS add_Operator Exp
+			| OP_MIN add_Operator Exp
 			| empty empty '''
-	if (p[1] == '+' or p[1] == '-'):
-		POper.append(p[1]) #Se agrega el operador  suma/resta a la pila de operadores
-		#print(POper)
+	# if (p[1] == '+' or p[1] == '-'):
+	# 	POper.append(p[1]) #Se agrega el operador  suma/resta a la pila de operadores
+	# 	#print(POper)
 
 def p_addTerm(p):
 	'''add_Term : empty'''
@@ -359,7 +360,7 @@ def p_addTerm(p):
 			POper.append(tempOPERADOR) # no es un "+" o "-"
 
 def p_termino(p):
-	'''Termino : Factor Termino2 add_Factor'''
+	'''Termino : Factor add_Factor Termino2 '''
 
 def p_addFactor(p):
 	'''add_Factor : empty'''
@@ -372,12 +373,12 @@ def p_addFactor(p):
 
 
 def p_termino2(p):
-	'''Termino2 : OP_MULT Termino
-				| OP_DIV Termino
+	'''Termino2 : OP_MULT add_Operator Termino
+				| OP_DIV add_Operator Termino
 				| empty '''
-	if (p[1] == '*' or p[1] == '/'):
-		POper.append(p[1])	#Se agrega el operador multiplicacion/division a la pila de operadores
-		#print(POper)
+	# if (p[1] == '*' or p[1] == '/'):
+	# 	POper.append(p[1])	#Se agrega el operador multiplicacion/division a la pila de operadores
+	# 	#print(POper)
 
 def p_factor(p):
 	'''Factor : PAR_I add_Factor_PAR_I Expresion PAR_D add_Factor_PAR_D Factor3
@@ -401,7 +402,7 @@ def p_add_Llamada_Factor_1(p):
 	'''add_Llamada_Factor_1 :  empty'''
 	if (proc_exists_in_list(p[-1])):
 		funcion_id.append(p[-1])	#Se guarda el nombre de la funcion que inicio la llamada en una lista = funcion_id
-		add_quadruple('ERA', p[-1], -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+		add_quadruple('ERA', p[-1], -1, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 		contador_k = [0]  # Se inicializa el contador k en 1
 		POper.append('[')	#Agregando el fondo falso
 	else:
@@ -431,7 +432,7 @@ def p_add_Llamada_Factor_3(p):
 	#print(PilaO)
 	#print("xprocs :", x.procsLocal[nombre_funcion]['Var_Table'].values()[count])
 	if(tipo_argumento == tipo2):
-		resultado_quadruple = add_quadruple('PARAMETER', valor_argumento, -1, ('Param' + str(count)), -1)  #Se genera el cuadruplo PARAMETER, tiene el k-esimo argumento
+		resultado_quadruple = add_quadruple('PARAMETER', valor_argumento, -1, ('Param' + str(count)), 0)  #Se genera el cuadruplo PARAMETER, tiene el k-esimo argumento
 		contador_k.append(count)
 		#print("parameter es:", resultado_quadruple)
 		#PilaO.append(resultado_quadruple)
@@ -452,7 +453,7 @@ def p_add_Llamada_Factor_5(p):
 	contador_k = [0]
 	nombre_funcion = funcion_id.pop()  #Se obtiene el nombre de la funcion que activo la llamada
 	funcion_id.append(nombre_funcion)
-	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple)
 	
@@ -479,6 +480,12 @@ def p_add_Llamada_Factor_6(p):
 		#operacion_cuadruplos('=')
 		resultado_quadruple = add_quadruple('=', operadorIzquierdo, -1, nombre_funcion, -1, 0) #se genera cuadruplos
 		PilaO.append(resultado_quadruple)	#se devuelve el operando a la pila de operadores		
+		
+		#print("TE ESTOY IMPRIMIENO; ", procs_return_type(nombre_funcion))
+		#pp.pprint( x.procsLocal)
+		PTipos.append(procs_return_type(nombre_funcion))
+		
+		
 		#pp.pprint(get_cuadruplos())
 
 	else:
@@ -594,12 +601,18 @@ def p_escritura3(p):
 
 def p_add_Escritura1(p):
 	'''add_Escritura1 : empty'''
-	PilaO.append(p[-1])
+	nombre = proc_brackList.pop()
+	proc_brackList.append(nombre)
+	if(busca_variable_en_directorio(nombre, p[-1])):
+		PilaO.append(p[-1])
+	else:
+		print ('<---[UNDECLARED_VARIABLE][Escritura]; Variable "{0}" no se encuentra previamente definida--->'.format( p[-1]))
+		exit(1)	
 
 def p_add_Escritura(p):
 	'''add_Escritura : empty'''
 	#PilaO.append(p[-1])				# Se otiene el ID directamente y se manda a la pila
-	print("imprimiendo esto: ", PilaO)
+	#print("imprimiendo esto: ", PilaO)
 
 	operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
 	#print(operandoTEMPORAL)
@@ -615,11 +628,17 @@ def p_lecturaa(p):
 
 def p_add_Lectura1(p):
 	'''add_Lectura1 :  empty'''
-	PilaO.append(p[-1])				# Se otiene el ID directamente y se manda a la pila
-	operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
+	#PilaO.append()				# Se otiene el ID directamente y se manda a la pila
+	#operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
+	nombre = proc_brackList.pop()
+	proc_brackList.append(nombre)
+	if(busca_variable_en_directorio(nombre, p[-1])):
 	#print(operandoTEMPORAL)
-	add_quadruple('INPUT', operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos INPUT
-
+		add_quadruple('INPUT',  p[-1], -1, -1, -1, 0) #se genera cuadruplos INPUT
+	else:
+		print ('<---[UNDECLARED_VARIABLE][Lectura]; Variable "{0}" no se encuentra previamente definida--->'.format( p[-1]))
+		exit(1)		
+		
 def p_funcion(p):
 	'''Funcion : FUNCTION Tipo2 ID add_Funcion_1 FuncionA add_Funcion_3'''
 
@@ -636,8 +655,8 @@ def p_add_Funcion_1(p):
 		proc_brackList.append(p[-1])	#Se agrega el nombre de la funcion a la lista para despues usar el nombre y actualizar sus parametros
 		count = contador_varsGlobales.pop() # Se otiene el contador de parametros y se manda al dir. de procs.
 		contador_varsGlobales.append(0)	#Se vacia el listado y se reinicializa en 0 parametros
-		#x.procs.update(x.add_procs_to_dict(p[-1],p[-2], count, 10000, {})) #Se da de alta el nombre del procedimiento
-		directorio_Activo['local'].update({ p[-1]: { 'Tipo': p[-2], '#Params': count, 'DireccionInicio': 10000, 'Var_Table': {}}}) # Se da de alta el procedimiento como local
+		func_Tipo = PTipos.pop()	#se saca el tipo de la funcion
+		directorio_Activo['local'].update({ p[-1]: { 'Tipo': func_Tipo, '#Params': count, 'DireccionInicio': 10000, 'Var_Table': {}}}) # Se da de alta el procedimiento como local
 		x.procsLocal.update(directorio_Activo['local'])
 
 		#print("Aqui estoy")
@@ -685,7 +704,7 @@ def p_add_Params1(p):
 		contador_varsGlobales.append(count +1)	# se suma 1 ya que se agrego una variable
 		tipo = vars_types.pop()	#Se obtiene el tipo de la variable
 		temp = directorio_Activo['local'].values().pop()
-		temp['Var_Table'].update({p[-1] : {'Size_1': 0, 'Size_2': 0, 'Tipo': tipo}})	#Se agrega la variable al diccionario local
+		temp['Var_Table'].update({p[-1] : {'Size_1': 1, 'Size_2': 0, 'Tipo': tipo}})	#Se agrega la variable al diccionario local
 		#print("Aca vamos")
 		#pp.pprint(directorio_Activo)
 
@@ -712,6 +731,7 @@ def p_add_Llamada_1(p):
 	#pp.pprint(proc_brackList)
 	if (proc_exists_in_list(p[-1])):
 		funcion_id.append(p[-1])
+		print("estoy imprimiendo llamadas: ", p[-1])
 	else:
 		print ('<---[UNDECLARED_FUNCTION][Llamada]; Procedimiento "{0}" no se encuentra previamente declarado--->'.format(p[-1]))
 		exit(1)
@@ -720,7 +740,7 @@ def p_add_Llamada_1(p):
 def p_add_Llamada_2(p):
 	'''add_Llamada_2 : empty '''
 	#print(p[-2])
-	add_quadruple('ERA', p[-3], -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	add_quadruple('ERA', p[-3], -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	contador_k = [0]  # Se inicializa el contador k en 1		
 
 	#	sacar #params del nombre de la funcion funcion_id.pop(), despues asignar memoria dependiendo de ese numero
@@ -751,7 +771,7 @@ def p_add_Llamada_3(p):
 	#print(tipo_argumento)
 	#pp.pprint(get_cuadruplos())
 	if(tipo_argumento == tipo2):
-		resultado_quadruple = add_quadruple('PARAMETER', valor_argumento, -1, ('Param' + str(count)), -1)  #Se genera el cuadruplo PARAMETER, tiene el k-esimo argumento
+		resultado_quadruple = add_quadruple('PARAMETER', valor_argumento, -1, ('Param' + str(count)), 0)  #Se genera el cuadruplo PARAMETER, tiene el k-esimo argumento
 		contador_k.append(count)
 		#PilaO.append(resultado_quadruple)
 	else:
@@ -769,7 +789,7 @@ def p_add_Llamada_5(p):
 	contador_k = [0]
 	nombre_funcion = funcion_id.pop()
 	#add_quadruple('GOSUB', nombre_funcion, -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
-	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple) #Se devuelve el temporal del gosub
 
@@ -813,7 +833,7 @@ def p_llamadaPersonaje2(p):
 				| empty '''
 
 def p_llamadaPersonaje3(p):
-	'''LlamadaPersonaje3 : COMA Expresion LlamadaPersonaje3
+	'''LlamadaPersonaje3 : COMA  LlamadaPersonaje2
 			 	| empty '''
 
 def p_regresa(p):
@@ -869,8 +889,6 @@ def p_add_While_3(p):
 def p_loopfor(p):
 #	''' LoopFor : FOR PAR_I Asignacion PCOMA Expresion PCOMA Expresion PAR_D Bloque '''
 	''' LoopFor : FOR ID add_For_1 EXP_EQ Expresion add_For_2 TO Expresion add_For_3 DO Bloque add_For_4 '''
-	
-	
 
 def p_add_For_1(p):
 	'''add_For_1 : empty '''
@@ -879,26 +897,33 @@ def p_add_For_1(p):
 
 def p_add_For_2(p):
 	'''add_For_2 : empty '''
-# 	auxExp1 = PilaO.pop()
-# 	auxID = PilaO.pop()
-# 	PilaO.append(auxID)
-# 	add_quadruple('=', auxID, -1, auxExp1, -1, 0)
+	auxExp1 = PilaO.pop()
+	auxID = PilaO.pop()
+	PilaO.append(auxID)
+	add_quadruple('=', auxID, -1, auxExp1, -1, 0)
 
 def p_add_For_3(p):
 	'''add_For_3 : empty '''
-# 	temp_Tf = PilaO.pop()
-# 	auxExp2 = PilaO.pop()
-# 	temp_Tx = PilaO.pop()
-# 	add_quadruple('=', temp_Tf, -1, auxExp2, -1, 0)
-# 	operacion_cuadruplos(auxExp2)
+	auxExp2 = PilaO.pop()
+	temp_Tf = auxExp2
+	temp_Tx = 0
+	resultado_Tf = add_quadruple('=', auxExp2, -1, temp_Tf, -1, 1)
+	#pp.pprint(get_cuadruplos())
+	auxID = PilaO.pop()
+	PilaO.append(auxID)
+	resultado_Tx = add_quadruple('<=', auxID, -1, resultado_Tf, -1, 0)
+	
+	add_quadruple('GOTOF', resultado_Tx, -1, -1, -1, 0) #se genera cuadruplo 
+	#liberar Tx
+	PSaltos.append(get_count_cuadruplos() - 2)
 
 def p_add_For_4(p):
 	'''add_For_4 : empty '''
-#	auxID = PilaO.pop()
-#	add_quadruple('+',auxID, -1, auxID, -1, 0)
-#	retorno = PSaltos.pop()
-#	add_quadruple('GOTO', retorno, -1, -1, -1, 0)
-#	rellenar_cuadruplo(retorno+1, cont)
+	auxID = PilaO.pop()
+	add_quadruple('+', auxID, -1, auxID, -1, 0)
+	retorno = PSaltos.pop()
+	add_quadruple('GOTO', retorno, -1, -1, -1, 0)
+	rellenar_cuadruplo(retorno+1)
 #	Liberar var temp Tf
 	
 def p_fvarasignacion(p):
@@ -924,7 +949,7 @@ def p_fvarasignaciona(p):
 						 | empty'''
 
 def p_archetype(p):
-	''' Archetype : TYPE EXP_EQ ArchetypeA '''
+		''' Archetype : TYPE EXP_EQ ArchetypeA '''
 
 def p_archetypea(p):
 	''' ArchetypeA : SHOTO PCOMA COMANDOS EXP_EQ Scomando
@@ -1112,29 +1137,25 @@ def procs_return_type(nombre):
 # 	return False
 
 def vars_return_type(nombre, v_id):
-	aux =x.procsLocal.keys()
-	#print("printiando aux", aux)
-	for y in aux:
-		if nombre in y:
-			#print("entro")
-			#print(y)
-			#print(v_id)
-			#pp.pprint(x.procsLocal[nombre]['Var_Table'][v_id]['Tipo'])
-			return x.procsLocal[nombre]['Var_Table'][v_id]['Tipo']
-	
-	aux = x.procsGlobal.keys()
-	for y in aux:
-		if nombre in y:
-			#print("entro")
-			#print("El tipo es", x.procsGlobal[nombre]['Tipo'])
-			return x.procsGlobal[nombre]['Var_Table'][v_id]['Tipo']
+	auxlocal = x.procsLocal[nombre]['Var_Table'].keys()
+	auxglobal = x.procsGlobal.keys()
+	auxglobalnombre = auxglobal.pop()
+	auxglobal = x.procsGlobal[auxglobalnombre]['Var_Table'].keys()
+	for key in auxlocal:
+		if key == v_id:
+			return (x.procsLocal[nombre]['Var_Table'][v_id]['Tipo'])
+	for key in auxglobal:
+		if key == v_id:
+			return (x.procsGlobal[auxglobalnombre]['Var_Table'][v_id]['Tipo'])
 	return False
 
 
 def operacion_cuadruplos(tempOPERADOR): 
 	operador = tempOPERADOR
 	tempTIPO2 = PTipos.pop()
+	#print("El tipo de op2 es: ", tempTIPO2)
 	tempTIPO1 = PTipos.pop()
+	#print("El tipo de op1 es: ", tempTIPO2)
 	if tempOPERADOR in relational_operators:
 		tempOPERADOR = 'comp'
 	elif tempOPERADOR in logical_operators:
@@ -1147,12 +1168,18 @@ def operacion_cuadruplos(tempOPERADOR):
 		tempOPERAND2 = PilaO.pop()
 		#print('Operando2: "{0}"'.format(resultadoTIPO))
 		#pp.pprint(get_cuadruplos())
+		#print("El operando 2 es: ", tempOPERAND2)
+		#print("El operandador es: ", operador)
 
 		tempOPERAND1 =  PilaO.pop()
+		#print("El operando 1 es: ", tempOPERAND1)
+
 		#print('Operando1: "{0}"'.format(tempOPERAND1))
 		resultado_quadruple = add_quadruple(operador, tempOPERAND1, tempTIPO1, tempOPERAND2, tempTIPO2, 0) #se genera cuadruplos
-		PilaO.append(resultado_quadruple)	#se devuelve el operando a la pila de operadores
-		PTipos.append(resultadoTIPO)		#se devuelve el tipo a la pila de tipos
+		if (operador != '='):
+			PilaO.append(resultado_quadruple)	#se devuelve el operando a la pila de operadores
+			PTipos.append(resultadoTIPO)		#se devuelve el tipo a la pila de tipos
+
 	else:
 	    #tronarlo
 	    print ('<---[ERROR_TYPE_MISMATCH][Expresion]; No se puede hacer la operacion con los tipos: {0}, {1}, {2}--->'.format(tempTIPO1, operador, tempTIPO2))
@@ -1160,7 +1187,7 @@ def operacion_cuadruplos(tempOPERADOR):
 
 
 def p_error(p):
-	print ("<---Syntax error--->")
+	print ("<---[SYNTAX_ERROR]--->")
 	print ("En el input: '{0}'\nEn el caracter: '{1}'\nEn la linea: '{2}'".format(p.type,  p.lexpos, p.lineno))
 	print ("En el valor: '{0}'".format(p.value))
 	print ("<------------------>")

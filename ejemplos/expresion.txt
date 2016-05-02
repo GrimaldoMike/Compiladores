@@ -1,0 +1,12 @@
+juego Juego_A :
+	var a[1] : int, 
+	    b[1] : int , 
+	    x[1] : int ;
+
+main (){
+    b = 8;
+    
+    x =  b * (3 * 4) / 4 ;
+    
+    a = 2 / 3 * x;
+}

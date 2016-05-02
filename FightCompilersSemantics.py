@@ -29,18 +29,18 @@ class Semantics(object):
         return var_dict
         
     #Revisa si existe el id en el diccionario de procedimientos
-    def proc_exists_in_dict(self, fid):
-     if fid in self.procs:
-      return True
-     else:
-      return False
+    # def proc_exists_in_dict(self, fid):
+    #  if fid in self.procs:
+    #   return True
+    #  else:
+    #   return False
 
-    #Revisa si existe el id en el diccionario de variables
-     def var_exists_in_dict(self, vid):
-      if vid in self.procs.keys():
-       return True
-      else:
-       return False
+    # #Revisa si existe el id en el diccionario de variables
+    #  def var_exists_in_dict(self, vid):
+    #   if vid in self.procs.keys():
+    #    return True
+    #   else:
+    #    return False
       
 
 semantics_cube = {
