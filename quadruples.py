@@ -95,6 +95,9 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
     elif operator == 'END':
         quadruples.append( [operator, -1, -1, -1] )
         return op1
+    elif operator == 'QCF':
+        quadruples.append( [operator, -1, -1, -1] )
+        return op1
 
     temp = 0
     

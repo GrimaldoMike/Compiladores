@@ -12,7 +12,7 @@ function int factorial ( int x ) {
         }
         else {
 
-            for i = 0 to x+1 do {
+            for i = 1 to x do {
             
                 fact = fact * i;
             };
@@ -24,5 +24,7 @@ function int factorial ( int x ) {
 
 
 main (){
+    
+    fact = 1;
     output( factorial(5) );
 }

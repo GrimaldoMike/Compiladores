@@ -9,23 +9,24 @@ personaje mike {
     comandos = .st .cr .KM .236 .PM;
 }
 
-
-function int suma ( float a,  int b ) {
+function int suma ( int a,  int b ) {
     
     x = 0;
     for a = 3 to 5 do {
     
-      b = x + 1.1;  
+      b = b + 1;  
         
     };
     
-    b = 2;
-    a = 7 + 8 * (10/10);
+    if (a>6){
+        b = 2;
+    	a = 7 + 8 * (10/10);
+	};
 	
 	input (a);
     output ("w1", "w2");
 
-    while (b>4){
+    while (b<4){
         b = 12 * 13 ;
     };
     
@@ -35,7 +36,7 @@ function int suma ( float a,  int b ) {
 main (){
     
     m = 23;
-    x = suma(2.4, m);
+    x = suma(2, m);
     
 
     output( "que tal chavo" );

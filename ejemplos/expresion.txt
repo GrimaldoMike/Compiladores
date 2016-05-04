@@ -5,8 +5,11 @@ juego Juego_A :
 
 main (){
     b = 8;
-    
+    x= 0;
+    a=0;
     x =  b * (3 * 4) / 4 ;
     
-    a = 2 / 3 * x;
+    a = 4 / 2 * x;
+    
+    output(a);
 }

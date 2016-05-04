@@ -8,7 +8,7 @@ function int suma ( int a, int b ) {
 
 
 main (){
-    x = 2;
-    output( suma(2,4) + suma(1, 8) - suma(x, y) );
-    output(7);
+    x= 2;
+    y = suma(1,8) + suma(2,4) - suma(x,4);
+    output(y);
 }

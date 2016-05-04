@@ -4,9 +4,10 @@ juego Juego_A :
 function int fibonacci(int n){
     a = 0;
     b = 1;
-    for i = 0 to n do {
+    for i = 1 to n do {
         temp = a;
         a = b;
+        
         b = temp + b;
     };
     return a;
@@ -16,5 +17,5 @@ function int fibonacci(int n){
     
 main (){
 
-    output(fibonacci(9));
+    output(fibonacci(12));
 }

@@ -446,13 +446,13 @@ def p_add_Llamada_Factor_3(p):
 	
 	max_Param = x.procsLocal[nombre_funcion]['#Params']
 
-	print(x.procsLocal[nombre_funcion]['Var_Table'])
-	print(x.procsLocal[nombre_funcion]['Var_Table'].keys()[count])
-	print(x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo'])
+	#print(x.procsLocal[nombre_funcion]['Var_Table'])
+	#print(x.procsLocal[nombre_funcion]['Var_Table'].keys()[count])
+	#print(x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo'])
 	if ( count < max_Param):
 		tipo2 = x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo']
 	else:
-		print ('<---[STACKOVERFLOW][Llamada_Factor]; Procedimiento "{0}" tiene "{1}" paraetros y se enviaron "{2}"--->'.format(nombre_funcion, max_Param, count))
+		print ('<---[STACKOVERFLOW][Llamada_Factor]; Procedimiento "{0}" tiene "{1}" parametros y se enviaron "{2}"--->'.format(nombre_funcion, max_Param, count))
 		exit(1)
 	#print('Lado izquierdo "{0}" Lado derecho "{1}"'.format(tipo_argumento, valor_argumento))
 	#print(PilaO)
@@ -468,13 +468,14 @@ def p_add_Llamada_Factor_3(p):
 
 def p_add_Llamada_Factor_4(p):
 	'''add_Llamada_Factor_4 : empty '''
-	print("cntador es: ", contador_k)
+	#print("cntador es: ", contador_k)
 	count = contador_k.pop()
 	contador_k.append(count+1)
 
 def p_add_Llamada_Factor_5(p):
 	'''add_Llamada_Factor_5 : empty '''
 	#global contador_parametros
+	global contador_k
 	if (POper and p[-1]) == ')':
 	    POper.pop()				#Se remueve el fondo falso
 	#print("add_Llamada_Factor_5 aqui")	    
@@ -484,7 +485,7 @@ def p_add_Llamada_Factor_5(p):
 	nombre_funcion = funcion_id.pop()  #Se obtiene el nombre de la funcion que activo la llamada
 	funcion_id.append(nombre_funcion)
 	pos_cuadruplo = get_posicion_quadruplo(nombre_funcion)
-	print("pos cuadruple", pos_cuadruplo)
+	#print("pos cuadruple", pos_cuadruplo)
 	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, pos_cuadruplo, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple)
@@ -1049,6 +1050,7 @@ def p_cespecial(p):
 
 def p_quartercf(p):
 	''' QuarterCF : QCF Golpe '''
+	add_quadruple('QCF', -1, -1, -1, -1, 0) #se genera cuadruplos
 
 def p_quartercb(p):
 	''' QuarterCB : QCB Patada '''
@@ -1106,8 +1108,8 @@ def proc_exists_in_list(v_id):
 			return True
 	
 	aux = x.procsGlobal.keys()
-	print("tu vid es: ", v_id)
-	print("aux es: ", aux)	
+	#print("tu vid es: ", v_id)
+	#print("aux es: ", aux)	
 	for y in aux:
 		if v_id in y:
 			#print("entro")
