@@ -8,12 +8,10 @@ import ply.yacc as yacc
 import sys
 import pprint
 import FightCompilersLex
-import json
-import logging
 #import FightCompilersSemantics
 from FightCompilersSemantics import Semantics, semantics_cube
 from Queue import Queue
-from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo, get_cuadruplos, quadruples
+from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo, get_cuadruplos
 from MemoryBlock import MemoryBlock
 
 # memory allocation (just variable counters representing: constants and local/global vars)
@@ -54,10 +52,6 @@ contador_parametros = [0] #contador que guarda el numero de parametros por funci
 contador_varsGlobales = [0] #contador que guarda el numero de variables globales
 contador_k = [0]
 
-Quads = {}
-Locals = {}
-Globals = {}
-
 
 directorio_Activo = {  #Lista que tienen los diccionarios de variables
 	'global' : {},
@@ -72,16 +66,11 @@ PSaltos = [] #Pila que guarda los saltos pendientes para la funcion rellenar_Cua
 # Parsing Rules
 def p_juego(p):
 	'''Juego : JUEGO ID add_Juego_1 DOSP JuegoA add_Juego_2 JuegoB MainProgram'''
-	global Quads, Locals, Globals
 	pp.pprint(get_cuadruplos())
 	#pp.pprint(x.procsGlobal)
 	#pp.pprint(x.procsLocal)
 	aux = get_cuadruplos()
-	Quads = get_cuadruplos()
-	Locals = x.procsLocal
-	Globals = x.procsGlobal
-	#print (Quads)
-	#print (aux[0][0])
+	print (aux[0][0])
 	# print(".................")
 
 def p_add_Juego_1(p):
@@ -230,8 +219,6 @@ def p_add_Main_2(p):		#funcion que se encarga de rellenar el primer GOTO de los 
 	if(PSaltos):
 		retorno = PSaltos.pop() #obtiene el valor de PSaltos mas auntiguo 
 		rellenar_cuadruplo(retorno)  #rellena el primer cuadruplo con ese valor
-		dirInicio = get_count_cuadruplos()
-		directorio_Activo['local']['main']['DireccionInicio'] = dirInicio	#Se actualiza la funcion la direccino inicio de cuadruplo
 		x.procsLocal.update(directorio_Activo['local'])
 		#pp.pprint("ACTUALIZANDO X.PROCS")
 		#pp.pprint(procsLocal)
@@ -419,41 +406,30 @@ def p_add_Llamada_Factor_1(p):
 		funcion_id.append(p[-1])	#Se guarda el nombre de la funcion que inicio la llamada en una lista = funcion_id
 		add_quadruple('ERA', p[-1], -1, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 		contador_k = [0]  # Se inicializa el contador k en 1
-		#print("aparecio cont; ", contador_k)
 		POper.append('[')	#Agregando el fondo falso
 	else:
 		print ('<---[UNDECLARED_FUNCTION][Llamada_Factor]; Procedimiento "{0}" no se encuentra previamente declarado--->'.format(p[-1]))
 		exit(1)
 
 def p_Llamada_Factor_2(p):
-	'''Llamada_Factor_2 : Expresion add_Llamada_Factor_3 Llamada_Factor_3 
+	'''Llamada_Factor_2 : Expresion add_Llamada_Factor_3 Llamada_Factor_3
 				| empty '''
 
 def p_Llamada_Factor_3(p):
-	'''Llamada_Factor_3 : COMA add_Llamada_Factor_4 Llamada_Factor_2 
+	'''Llamada_Factor_3 : COMA add_Llamada_Factor_4 Llamada_Factor_2
 			 	| empty '''
 				
 def p_add_Llamada_Factor_3(p):
 	'''add_Llamada_Factor_3 : empty '''
-	valor_argumento = PilaO.pop() #
-	tipo_argumento = PTipos.pop() #
+	valor_argumento = PilaO.pop() #aqui estamos obteniendo el 2.4
+	tipo_argumento = PTipos.pop() #tipo de 2.4 = float
 	
 	nombre_funcion = funcion_id.pop() 
 	funcion_id.append(nombre_funcion)
-	#print("Count: ", contador_k)
-	count = contador_k.pop()
-	#print('Lado izquierdo "{0}" Lado derecho "{1}"'.format(valor_argumento, tipo_argumento))
-	
-	max_Param = x.procsLocal[nombre_funcion]['#Params']
 
-	print(x.procsLocal[nombre_funcion]['Var_Table'])
-	print(x.procsLocal[nombre_funcion]['Var_Table'].keys()[count])
-	print(x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo'])
-	if ( count < max_Param):
-		tipo2 = x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo']
-	else:
-		print ('<---[STACKOVERFLOW][Llamada_Factor]; Procedimiento "{0}" tiene "{1}" paraetros y se enviaron "{2}"--->'.format(nombre_funcion, max_Param, count))
-		exit(1)
+	count = contador_k.pop()
+	tipo2 = x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo']
+
 	#print('Lado izquierdo "{0}" Lado derecho "{1}"'.format(tipo_argumento, valor_argumento))
 	#print(PilaO)
 	#print("xprocs :", x.procsLocal[nombre_funcion]['Var_Table'].values()[count])
@@ -468,7 +444,6 @@ def p_add_Llamada_Factor_3(p):
 
 def p_add_Llamada_Factor_4(p):
 	'''add_Llamada_Factor_4 : empty '''
-	print("cntador es: ", contador_k)
 	count = contador_k.pop()
 	contador_k.append(count+1)
 
@@ -477,15 +452,10 @@ def p_add_Llamada_Factor_5(p):
 	#global contador_parametros
 	if (POper and p[-1]) == ')':
 	    POper.pop()				#Se remueve el fondo falso
-	#print("add_Llamada_Factor_5 aqui")	    
-
 	contador_k = [0]
-	#contador_k = [0]
 	nombre_funcion = funcion_id.pop()  #Se obtiene el nombre de la funcion que activo la llamada
 	funcion_id.append(nombre_funcion)
-	pos_cuadruplo = get_posicion_quadruplo(nombre_funcion)
-	print("pos cuadruple", pos_cuadruplo)
-	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, pos_cuadruplo, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple)
 	
@@ -498,6 +468,14 @@ def p_add_Llamada_Factor_6(p):
 		operadorIzquierdo = PilaO.pop()
 		#PilaO.append(operadorIzquierdo)
 		#PilaO.append(nombre_funcion)
+		
+		#tipoDerecho = PilaO.pop()
+		#print('Lado izquierdo "{0}" operador "{1}" Lado derecho "{2}"'.format(operadorIzquierdo, operadorIgual, operadorDerecho))
+		#rint('Lado izquierdo "{0}" Lado derecho "{1}"'.format(operadorIzquierdo, operadorDerecho))
+		#print(PilaO)
+		#print(var_brackList)
+		#if (vars_exists_in_list(operadorIzquierdo)):
+		#pp.pprint(operadorIzquierdo)
 
 		#print("Nombre de funciones:")
 		proc_brackList.append(nombre_funcion)
@@ -509,8 +487,7 @@ def p_add_Llamada_Factor_6(p):
 		#pp.pprint( x.procsLocal)
 		PTipos.append(procs_return_type(nombre_funcion))
 		
-		contador_k = [0]
-		#print("add_Llamada_Factor_6", contador_k)
+		
 		#pp.pprint(get_cuadruplos())
 
 	else:
@@ -699,9 +676,6 @@ def p_add_Funcion_2(p):
 	var = proc_brackList.pop() #Se obtiene el nombre de la funcion actual
 	proc_brackList.append(var)
 	directorio_Activo['local'][var]['#Params'] = count	#Se actualiza la funcion con su numero de parametros
-	dirInicio = get_count_cuadruplos()
-	directorio_Activo['local'][var]['DireccionInicio'] = dirInicio	#Se actualiza la funcion la direccino inicio de cuadruplo
-	
 	x.procsLocal.update(directorio_Activo['local'])
 
 	
@@ -737,7 +711,7 @@ def p_add_Params1(p):
 		contador_varsGlobales.append(count +1)	# se suma 1 ya que se agrego una variable
 		tipo = vars_types.pop()	#Se obtiene el tipo de la variable
 		temp = directorio_Activo['local'].values().pop()
-		temp['Var_Table'].update({p[-1] : {'Size_1': 1, 'Size_2': 0, 'Tipo': tipo, 'DireccionInicio': 2000}})	#Se agrega la variable al diccionario local
+		temp['Var_Table'].update({p[-1] : {'Size_1': 1, 'Size_2': 0, 'Tipo': tipo, 'DireccionInicio': 20000}})	#Se agrega la variable al diccionario local
 		#print("Aca vamos")
 		#pp.pprint(directorio_Activo)
 
@@ -790,9 +764,8 @@ def p_add_Llamada_3(p):
 
 	#print(funcion_id)
 	count = contador_k.pop()
-
+	#print(count)
 	tipo2 = x.procsLocal[nombre_funcion]['Var_Table'].values()[count]['Tipo']
-	
 	#aux = x.procsLocal[nombre_funcion]['Var_Tables'].keys()
 	#x.procsLocal[nombre_funcion]['Var_Table'].keys()[n]
 	
@@ -823,9 +796,7 @@ def p_add_Llamada_5(p):
 	contador_k = [0]
 	nombre_funcion = funcion_id.pop()
 	#add_quadruple('GOSUB', nombre_funcion, -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
-	pos_cuadruplo = get_posicion_quadruplo(nombre_funcion) #Se obtiene la posicion de cuadruplo donde comienza la funcion
-
-	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, pos_cuadruplo, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple) #Se devuelve el temporal del gosub
 
@@ -928,17 +899,14 @@ def p_loopfor(p):
 
 def p_add_For_1(p):
 	'''add_For_1 : empty '''
-	nombre = proc_brackList.pop()
-	proc_brackList.append(nombre)
-	if (busca_variable_en_directorio(nombre, p[-1])):
+	if (vars_exists_in_list(p[-1])):
 		PilaO.append(p[-1])  # Guardar el identificador (direccion) en pila de Operandos (PilaO), verificar semantica
 
 def p_add_For_2(p):
 	'''add_For_2 : empty '''
 	auxExp1 = PilaO.pop()
-	#print("Imprimiendo auxExp1: ", auxExp1)
+	p
 	auxID = PilaO.pop()
-	#print("Imprimiendo auxID: ", auxID)
 	PilaO.append(auxID)
 	add_quadruple('=', auxID, -1, auxExp1, -1, 0)
 
@@ -959,12 +927,8 @@ def p_add_For_3(p):
 
 def p_add_For_4(p):
 	'''add_For_4 : empty '''
-	print(PilaO)
 	auxID = PilaO.pop()
-	print(PilaO)
-	#add_quadruple('+', auxID, -1, auxID, -1, 0)
-	resultado_cuadruplo = add_quadruple('+', auxID, -1, 1, -1, 0)  #PREGUNTAR A NERI SI ESTO DEBE SER, O EL DE ARRIBA
-	add_quadruple('=', auxID, -1, resultado_cuadruplo, -1, 0)  #PREGUNTAR A NERI SI ESTO DEBE SER, O EL DE ARRIBA
+	add_quadruple('+', auxID, -1, auxID, -1, 0)
 	retorno = PSaltos.pop()
 	add_quadruple('GOTO', retorno, -1, -1, -1, 0)
 	rellenar_cuadruplo(retorno+1)
@@ -1228,11 +1192,7 @@ def operacion_cuadruplos(tempOPERADOR):
 	    #tronarlo
 	    print ('<---[ERROR_TYPE_MISMATCH][Expresion]; No se puede hacer la operacion con los tipos: {0}, {1}, {2}--->'.format(tempTIPO1, operador, tempTIPO2))
 	    exit(1)
-	    
-def get_posicion_quadruplo(nombre_funcion):		#devuelve el numero de cuadruplo de la funcion
-	posicion = x.procsLocal[nombre_funcion]['DireccionInicio']
-	return posicion
-            
+
 
 def p_error(p):
 	print ("<---[SYNTAX_ERROR]--->")
@@ -1242,46 +1202,18 @@ def p_error(p):
 
 parser = yacc.yacc()
 
-# if(len(sys.argv) > 1):
-#     if sys.argv[1] == "-f":
-#         f = open(sys.argv[2], "r")
-#         s = f.readlines()
-#     string = ""
-#     for line in s:
-#         string += line
-#     print (string)
-#     result = parser.parse(string)
-# else:
-#     print ("Error")
-
-
 if(len(sys.argv) > 1):
-	if sys.argv[1] == "-f":
-	    f = open(sys.argv[2], "r")
-	    s = f.readlines()
-	string = ""
-	code = []
-	lineCounter = 1
-	for line in s:
-	    string += line
-	    code.append( {'lineno': lineCounter, 'line': line} )
-	    lineCounter += 1
-	print(string)
-	result = parser.parse(string)
-	#logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
-	#log = logging.getLogger()
-	
-	#result = parser.parse(string, debug=log)
-	
-	output_dict = {
-	        'funcs_Global': Globals,
-	        'funcs_Local': Locals,
-	        'quadruples': Quads,
-	        'code': code
-	}
-	output_string = json.dumps(output_dict)
-	output_file = open('executable.json', 'w')
-	output_string = output_string
-	output_file.write(output_string)
+    if sys.argv[1] == "-f":
+        f = open(sys.argv[2], "r")
+        s = f.readlines()
+    string = ""
+    for line in s:
+        string += line
+    print (string)
+    result = parser.parse(string)
 else:
-	print ("Error")
+    print ("Error")
+
+#def p_expression_plus(p):
+ #   'scomando : scomando PLUS ataque'
+  #  p[0] = p[1] + p

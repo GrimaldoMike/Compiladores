@@ -1,7 +1,7 @@
 juego Juego_A :
-	var x[1] : int, y[1] int;
+	var x[1] : int, y[1]: int;
 
-function int factorial ( int a, int b ) {
+function int suma ( int a, int b ) {
 
     return a + b;
 }
@@ -9,7 +9,6 @@ function int factorial ( int a, int b ) {
 
 main (){
     x = 2;
-    y = suma(1, 2) + suma(3, 0);
     output( suma(2,4) + suma(1, 8) - suma(x, y) );
     output(7);
 }

@@ -20,5 +20,5 @@ function int fibonacci ( int x ) {
 main (){
 
     fibonacci(9);
-    output(z);
+    output(y);
 }

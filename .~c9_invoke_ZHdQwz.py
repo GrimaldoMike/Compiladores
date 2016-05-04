@@ -13,7 +13,7 @@ import logging
 #import FightCompilersSemantics
 from FightCompilersSemantics import Semantics, semantics_cube
 from Queue import Queue
-from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo, get_cuadruplos, quadruples
+from quadruples import add_quadruple, check_operation, relational_operators, logical_operators, ignored_checks, get_count_cuadruplos, rellenar_cuadruplo, get_cuadruplos
 from MemoryBlock import MemoryBlock
 
 # memory allocation (just variable counters representing: constants and local/global vars)
@@ -54,10 +54,6 @@ contador_parametros = [0] #contador que guarda el numero de parametros por funci
 contador_varsGlobales = [0] #contador que guarda el numero de variables globales
 contador_k = [0]
 
-Quads = {}
-Locals = {}
-Globals = {}
-
 
 directorio_Activo = {  #Lista que tienen los diccionarios de variables
 	'global' : {},
@@ -72,15 +68,10 @@ PSaltos = [] #Pila que guarda los saltos pendientes para la funcion rellenar_Cua
 # Parsing Rules
 def p_juego(p):
 	'''Juego : JUEGO ID add_Juego_1 DOSP JuegoA add_Juego_2 JuegoB MainProgram'''
-	global Quads, Locals, Globals
 	pp.pprint(get_cuadruplos())
 	#pp.pprint(x.procsGlobal)
 	#pp.pprint(x.procsLocal)
 	aux = get_cuadruplos()
-	Quads = get_cuadruplos()
-	Locals = x.procsLocal
-	Globals = x.procsGlobal
-	#print (Quads)
 	#print (aux[0][0])
 	# print(".................")
 
@@ -230,8 +221,6 @@ def p_add_Main_2(p):		#funcion que se encarga de rellenar el primer GOTO de los 
 	if(PSaltos):
 		retorno = PSaltos.pop() #obtiene el valor de PSaltos mas auntiguo 
 		rellenar_cuadruplo(retorno)  #rellena el primer cuadruplo con ese valor
-		dirInicio = get_count_cuadruplos()
-		directorio_Activo['local']['main']['DireccionInicio'] = dirInicio	#Se actualiza la funcion la direccino inicio de cuadruplo
 		x.procsLocal.update(directorio_Activo['local'])
 		#pp.pprint("ACTUALIZANDO X.PROCS")
 		#pp.pprint(procsLocal)
@@ -483,9 +472,7 @@ def p_add_Llamada_Factor_5(p):
 	#contador_k = [0]
 	nombre_funcion = funcion_id.pop()  #Se obtiene el nombre de la funcion que activo la llamada
 	funcion_id.append(nombre_funcion)
-	pos_cuadruplo = get_posicion_quadruplo(nombre_funcion)
-	print("pos cuadruple", pos_cuadruplo)
-	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, pos_cuadruplo, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple)
 	
@@ -699,9 +686,6 @@ def p_add_Funcion_2(p):
 	var = proc_brackList.pop() #Se obtiene el nombre de la funcion actual
 	proc_brackList.append(var)
 	directorio_Activo['local'][var]['#Params'] = count	#Se actualiza la funcion con su numero de parametros
-	dirInicio = get_count_cuadruplos()
-	directorio_Activo['local'][var]['DireccionInicio'] = dirInicio	#Se actualiza la funcion la direccino inicio de cuadruplo
-	
 	x.procsLocal.update(directorio_Activo['local'])
 
 	
@@ -823,9 +807,7 @@ def p_add_Llamada_5(p):
 	contador_k = [0]
 	nombre_funcion = funcion_id.pop()
 	#add_quadruple('GOSUB', nombre_funcion, -1, -1, -1)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
-	pos_cuadruplo = get_posicion_quadruplo(nombre_funcion) #Se obtiene la posicion de cuadruplo donde comienza la funcion
-
-	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, pos_cuadruplo, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
+	resultado_quadruple = add_quadruple('GOSUB', nombre_funcion, -1, -1, 0)  #Se genera el cuadruplo ERA, tiene expansion del registro activacion de acuerdo al tamano definido
 	#print("probando: ", resultado_quadruple)
 	PilaO.append(resultado_quadruple) #Se devuelve el temporal del gosub
 
@@ -1229,10 +1211,7 @@ def operacion_cuadruplos(tempOPERADOR):
 	    print ('<---[ERROR_TYPE_MISMATCH][Expresion]; No se puede hacer la operacion con los tipos: {0}, {1}, {2}--->'.format(tempTIPO1, operador, tempTIPO2))
 	    exit(1)
 	    
-def get_posicion_quadruplo(nombre_funcion):		#devuelve el numero de cuadruplo de la funcion
-	posicion = x.procsLocal[nombre_funcion]['DireccionInicio']
-	return posicion
-            
+
 
 def p_error(p):
 	print ("<---[SYNTAX_ERROR]--->")
@@ -1256,32 +1235,31 @@ parser = yacc.yacc()
 
 
 if(len(sys.argv) > 1):
-	if sys.argv[1] == "-f":
-	    f = open(sys.argv[2], "r")
-	    s = f.readlines()
-	string = ""
-	code = []
-	lineCounter = 1
-	for line in s:
-	    string += line
-	    code.append( {'lineno': lineCounter, 'line': line} )
-	    lineCounter += 1
-	print(string)
-	result = parser.parse(string)
-	#logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
-	#log = logging.getLogger()
-	
-	#result = parser.parse(string, debug=log)
-	
-	output_dict = {
-	        'funcs_Global': Globals,
-	        'funcs_Local': Locals,
-	        'quadruples': Quads,
-	        'code': code
-	}
-	output_string = json.dumps(output_dict)
-	output_file = open('executable.json', 'w')
-	output_string = output_string
-	output_file.write(output_string)
+    if sys.argv[1] == "-f":
+        f = open(sys.argv[2], "r")
+        s = f.readlines()
+    string = ""
+    code = []
+    lineCounter = 1
+    for line in s:
+        string += line
+        code.append( {'lineno': lineCounter, 'line': line} )
+        lineCounter += 1
+
+    print string
+    #logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
+    #log = logging.getLogger()
+
+    #result = parser.parse(string, debug=log)
+
+    output_dict = {
+            'funcs_Global': x.procsGlobal,
+            'funcs_Local': x.procsLocal,
+            'quadruples': get_cuadruplos(),
+    }
+    output_string = json.dumps(output_dict)
+    output_file = open('executable.js', 'w')
+    output_string = 'var executable = ' + output_string
+    output_file.write(output_string)
 else:
-	print ("Error")
+    print "Error"

@@ -18,13 +18,14 @@ class Semantics(object):
         return proc_dict
 
     # Agrega nueva variable al diccionario de variables
-    def add_vars_to_dict(self, vtipo, vsize_1, vsize_2):
+    def add_vars_to_dict(self, vtipo, vsize_1, vsize_2, fdirI):
         var_dict = {}
         var_dict = {
             #'Nombre' : vid,
             'Tipo' : vtipo,
             'Size_1' : vsize_1,
-            'Size_2' : vsize_2
+            'Size_2' : vsize_2,
+            'DireccionInicio': fdirI
             }
         return var_dict
         
@@ -194,6 +195,7 @@ semantics_cube = {
     ('bool', '=', 'float') : 'bool',
 
     # float with float
+    ('float', '=', 'int') : 'float',
     ('float', '=', 'float') : 'float',
     ('float', '+', 'float') : 'float',
     ('float', '-', 'float') : 'float',

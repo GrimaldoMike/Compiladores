@@ -1,0 +1,28 @@
+juego Juego_A :
+	var fact[1] : int, i[1] : int;
+
+function int factorial ( int x ) {
+    if (x < 0){
+        return false;
+    }
+    else{
+        if (x == 0){
+            
+            fact = 1;
+        }
+        else {
+
+            for i = 0 to x+1 do {
+            
+                fact = fact * i;
+            };
+        return fact;
+
+        };
+    };
+}
+
+
+main (){
+    output( factorial(5) );
+}

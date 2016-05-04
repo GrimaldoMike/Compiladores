@@ -89,7 +89,7 @@ def add_quadruple(operator, op1, type1,  op2, type2, modIndex=0):
         quadruples.append( [operator, op1, -1, op2] )
         return op1
     elif operator == 'GOSUB':
-        quadruples.append( [operator, -1, -1, op1] )
+        quadruples.append( [operator, op2, -1, op1] )
         offset += 1
         return ('temp'+str(offset-1))
     elif operator == 'END':
