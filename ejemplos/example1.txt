@@ -9,7 +9,7 @@ personaje mike {
     comandos = .st .cr .KM .236 .PM;
 }
 
-function int suma ( int a,  int b ) {
+function int func1 ( int a,  int b ) {
     
     x = 0;
     for a = 3 to 5 do {
@@ -36,10 +36,9 @@ function int suma ( int a,  int b ) {
 main (){
     
     m = 23;
-    x = suma(2, m);
+    x = func1(2, m);
     
 
-    output( "que tal chavo" );
     output(x);
  
 }

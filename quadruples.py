@@ -1,3 +1,8 @@
+# Proyecto compilador Python
+# Generacion de Cuadruplos de Fight Compilers ENERO-MAYO 2016
+# Hecho por Jaime Neri y Mike Grimaldo
+#!env/bin/python
+
 from sets import Set
 from FightCompilersSemantics import Semantics, semantics_cube
 

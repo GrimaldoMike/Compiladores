@@ -1,3 +1,4 @@
+#NO FUE IMPLEMENTADO PARA EL PROYECTO
 class MemoryBlock:
     def __init__(self, start_dir, ints_start_dir, floats_start_dir, chars_start_dir, strings_start_dir, limit):
        '''All blocks have to be in ascending order and non overlapping on init. We leave that to the developer that uses this class'''

@@ -1,5 +1,5 @@
 # Proyecto compilador Python
-# PLY de Fight Compilers 2016
+# Compilador (Sintaxis y Semantica) de Fight Compilers ENERO-MAYO 2016
 # Parte Yacc
 # Hecho por Jaime Neri y Mike Grimaldo
 #!env/bin/python
@@ -50,6 +50,7 @@ funcion_id = []
 var_brackList = []  #Lista que tienen los diccionarios de variables
 proc_brackList = []  #Lista que tienen los diccionarios de procedimientos
 
+
 contador_parametros = [0] #contador que guarda el numero de parametros por funcion
 contador_varsGlobales = [0] #contador que guarda el numero de variables globales
 contador_k = [0]
@@ -68,12 +69,12 @@ PilaO = [] #Pila de operandos '5'
 POper = [] #Pila de operadores '+' '-' '*' '/'
 PTipos = [] #Pila que guarda los tipos e operandos
 PSaltos = [] #Pila que guarda los saltos pendientes para la funcion rellenar_Cuadruplo
-
+PDimensionada = [] #Pila que guarda los valores de las dimensiones
 # Parsing Rules
 def p_juego(p):
 	'''Juego : JUEGO ID add_Juego_1 DOSP JuegoA add_Juego_2 JuegoB MainProgram'''
 	global Quads, Locals, Globals
-	pp.pprint(get_cuadruplos())
+	#pp.pprint(get_cuadruplos())
 	#pp.pprint(x.procsGlobal)
 	#pp.pprint(x.procsLocal)
 	aux = get_cuadruplos()
@@ -138,7 +139,7 @@ def p_add_Vars2_1(p):
 		exit(1)	
 	else:
 		temp = directorio_Activo['global'].values().pop()
-		temp['Var_Table'].update({p[-1] : {'Size_1': 0, 'Size_2': 0, 'Tipo': 0, 'DireccionInicio': 2000}})
+		temp['Var_Table'].update({p[-1] : {'Size_1': 0, 'Size_2': 0, 'Tipo': 0, 'DireccionInicio': 2000, 'Dimensionada_1': {} }})
 		#pp.pprint(directorio_Activo)
 		count = contador_varsGlobales.pop()  #se obtiene el contador actual de la lista
 		contador_varsGlobales.append(count +1)	# se suma 1 ya que se agrego una variable
@@ -155,6 +156,9 @@ def p_add_Vars2_2(p):
 			#PilaO.append(var_id)
 			temp = directorio_Activo['global'].values().pop()
 			temp['Var_Table'][var_id]['Size_1'] = size1 #Se el tamano de la variable size_1
+			
+			for x in range(0, int(size1)):
+			    temp['Var_Table'][var_id]['Dimensionada_1'] = {}  #Se recorre tamano del size_! para agregar el valor de cada casilla		
 			var_brackList.append(var_id)	 # Se agrega la variable a bracketlist para usarse despues al agregar su size2
 		else:
 			print ('<---[VARIABLE_SIZE][Vars]; Variable "{0}" debe tener un tamano mayor a 0--->'.format(p[-1]))
@@ -278,7 +282,7 @@ def p_estatuto2a(p):
 				 | LoopFor PCOMA Estatuto2'''
 				
 def p_asignacion(p):
-	'''Asignacion : ID add_ID_TYPE_1 EXP_EQ add_Asignacion_2 Expresion add_Asignacion_3 '''
+	'''Asignacion : ID add_ID_TYPE_1 Entra_A_Var EXP_EQ add_Asignacion_2 Expresion add_Asignacion_3 '''
 	#print("Variable: ")
 	#print(p[1])
 	#print("Var_brackelist actual: ")
@@ -306,8 +310,12 @@ def p_add_Asignacion_3(p):
 	if(PilaO):
 		operadorDerecho = PilaO.pop()
 		operadorIzquierdo = PilaO.pop()
-		PilaO.append(operadorIzquierdo)
-		PilaO.append(operadorDerecho)
+		operador_auxI = operadorIzquierdo
+		operador_auxD = operadorDerecho
+		
+		#print("LO IMPRIMO AQUI DER", operadorDerecho )
+		#print("LO IMPRIMO AQUI IZQ", operadorIzquierdo )
+
 		operadorAsigna = POper.pop()
 		#tipoDerecho = PilaO.pop()
 		#print('Lado izquierdo "{0}" operador "{1}" Lado derecho "{2}"'.format(operadorIzquierdo, operadorIgual, operadorDerecho))
@@ -318,9 +326,33 @@ def p_add_Asignacion_3(p):
 		#pp.pprint(operadorIzquierdo)
 
 		nombre_funcion = proc_brackList.pop()  #Se obtiene el nombre de la funcion
-		#print("Nombre de funciones:")
+		#print("Nombre de funciones:") 
 		proc_brackList.append(nombre_funcion)
+		if (len(operador_auxI) == 2):		#Si la variable es
+			valor = operador_auxI.pop()
+			operadorIzquierdo = operador_auxI.pop()
+			operador_auxI.append(operadorIzquierdo)
+			operador_auxI.append(valor)
+
+		#SIGUE OPERADOR 2
+		if not(operador_auxD):
+			if (len(operador_auxD) == 2):		#Si la variable es
+				#print("Aqui quedo: ", len(operador_auxD) )
+				valor = operador_auxD.pop()
+				operadorDerecho = operador_auxD.pop()
+				operador_auxD.append(operadorDerecho)
+				operador_auxD.append(valor)
+
 		if (busca_variable_en_directorio(nombre_funcion, operadorIzquierdo)):
+
+			if (len(operador_auxD) == 2):
+				operadorDerecho = operador_auxD
+				
+			if (len(operador_auxI) == 2):
+				operadorIzquierdo = operador_auxI
+
+			PilaO.append(operadorIzquierdo)
+			PilaO.append(operadorDerecho)	
 			operacion_cuadruplos(operadorAsigna)
 		else:
 			print ('<---[UNDECLARED_VARIABLE][Asignacion]; Variable "{0}" no se encuentra previamente definida--->'.format(operadorIzquierdo))
@@ -370,6 +402,7 @@ def p_addTerm(p):
 	if (POper):
 		tempOPERADOR = POper.pop() #Se obtiene el operador tope de la lista
 		if (tempOPERADOR == '+' or tempOPERADOR == '-' ): # Si eloperador es "+" o "-", se continua evaluar los operandos
+			#print("Los operandos son", PilaO)
 			operacion_cuadruplos(tempOPERADOR) # se manda llamar la funcion que verifica los cuadruplos en el cubo semantico
 		else:
 			POper.append(tempOPERADOR) # no es un "+" o "-"
@@ -399,8 +432,42 @@ def p_factor(p):
 	'''Factor : PAR_I add_Factor_PAR_I Expresion PAR_D add_Factor_PAR_D Factor3
 			  | Factor2 VarCte
 			  | Llamada_Factor  empty
-			  | ID add_ID_TYPE_1  '''
+			  |  ID add_ID_TYPE_1 Entra_A_Var   '''
 			  
+def p_entra_a_Var(p):
+	'''Entra_A_Var : COR_I add_Entra_1 Exp add_Entra_2 COR_D
+					| empty'''
+
+def p_add_Entra_1(p):
+	'''add_Entra_1 : empty'''
+	nombre = proc_brackList.pop()
+	proc_brackList.append(nombre)
+	var_id = PilaO.pop()
+	PilaO.append(var_id)
+	POper.append('[')
+	if(not(vars_return_size_1(nombre, var_id) >= 1)):
+		print ('<---[ERROR_SIZE_MISMATCH][Factor]; La variable "{0}" no es una variable dimensionada {1} --->'.format(p[-3], vars_return_size_1(nombre, var_id) ))
+		exit(1)
+
+def p_add_Entra_2(p):
+	'''add_Entra_2 : empty'''
+	indice = PilaO.pop()
+	var_id = PilaO.pop()
+	#var_id = PDimensionada.pop()
+	#nombre = proc_brackList.pop()
+	#proc_brackList.append(nombre)
+	#size1 = vars_return_size_1(nombre, var_id)
+	#if(size1 > indice):
+	operador = POper.pop()
+
+	PilaO.append([var_id, indice])
+		#print(var_id[indice])
+		#PDimensionada.append(var_id[indice])
+	#else:
+#		print ('<---[STACKOVERFLOW][Factor]; Variable "{0}" tiene un tamano de "{1}" y se intento accesar "{2}"--->'.format(var_id, size1, indice))
+#		exit(1)
+
+
 def p_add_Factor_PAR_I(p):
 	'''add_Factor_PAR_I :  empty'''
 	POper.append(p[-1])		#Se introduceel parentesis como fondo falso
@@ -531,6 +598,7 @@ def p_add_ID_TYPE_1(p):
 	#print(tipo)
 	PTipos.append(tipo)
 	PilaO.append(p[-1])
+	#print("var_id",var_id)	
 	#print(PilaO)
 
 def p_factor2(p):
@@ -551,6 +619,8 @@ def p_varcte(p):
 		  	  |  FALSE  Add_BOOLF_TYPE'''
 	pass
 	PilaO.append(p[1])
+	#print("CTE es: ",PilaO)
+	
 #	if  PTipos:
 #		print (PTipos)
 	
@@ -613,7 +683,7 @@ def p_escritura(p):
 	'''Escritura : OUTPUT PAR_I Escritura2 '''
 
 def p_escritura2(p):
-	'''Escritura2 :  ID add_Escritura1 add_Escritura Escritura3
+	'''Escritura2 :  ID add_Escritura1 Entra_A_Var add_Escritura Escritura3
  			  |  CTE_STRING add_Escritura2 add_Escritura Escritura3
  			  |  Llamada_Factor add_Escritura Escritura3 '''
 
@@ -654,21 +724,27 @@ def p_lectura(p):
 	'''Lectura : INPUT PAR_I LecturaA PAR_D '''
 
 def p_lecturaa(p):
-	'''LecturaA : ID add_Lectura1 LecturaA
+	'''LecturaA : ID add_Lectura1 Entra_A_Var add_Lectura2  LecturaA
 				| empty '''
 
 def p_add_Lectura1(p):
 	'''add_Lectura1 :  empty'''
-	#PilaO.append()				# Se otiene el ID directamente y se manda a la pila
-	#operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
 	nombre = proc_brackList.pop()
-	proc_brackList.append(nombre)
+	proc_brackList.append(nombre)	
 	if(busca_variable_en_directorio(nombre, p[-1])):
-	#print(operandoTEMPORAL)
-		add_quadruple('INPUT',  p[-1], -1, -1, -1, 0) #se genera cuadruplos INPUT
+		PilaO.append(p[-1])
 	else:
 		print ('<---[UNDECLARED_VARIABLE][Lectura]; Variable "{0}" no se encuentra previamente definida--->'.format( p[-1]))
-		exit(1)		
+		exit(1)	
+
+def p_add_Lectura2(p):
+	'''add_Lectura2 :  empty'''
+	#PilaO.append()				# Se otiene el ID directamente y se manda a la pila
+	#operandoTEMPORAL = PilaO.pop()  # Se obtiene operando y se genera el cuadruplo
+	operandoTEMPORAL = PilaO.pop()
+
+	add_quadruple('INPUT',  operandoTEMPORAL, -1, -1, -1, 0) #se genera cuadruplos INPUT
+	
 		
 def p_funcion(p):
 	'''Funcion : FUNCTION Tipo2 ID add_Funcion_1 FuncionA add_Funcion_3'''
@@ -738,7 +814,7 @@ def p_add_Params1(p):
 		contador_varsGlobales.append(count +1)	# se suma 1 ya que se agrego una variable
 		tipo = vars_types.pop()	#Se obtiene el tipo de la variable
 		temp = directorio_Activo['local'].values().pop()
-		temp['Var_Table'].update({p[-1] : {'Size_1': 1, 'Size_2': 0, 'Tipo': tipo, 'DireccionInicio': 2000}})	#Se agrega la variable al diccionario local
+		temp['Var_Table'].update({p[-1] : {'Size_1': 1, 'Size_2': 0, 'Tipo': tipo, 'DireccionInicio': 2000, 'Dimensionada_1': {}}})	#Se agrega la variable al diccionario local
 		#print("Aca vamos")
 		#pp.pprint(directorio_Activo)
 
@@ -765,7 +841,7 @@ def p_add_Llamada_1(p):
 	#pp.pprint(proc_brackList)
 	if (proc_exists_in_list(p[-1])):
 		funcion_id.append(p[-1])
-		print("estoy imprimiendo llamadas: ", p[-1])
+		#print("estoy imprimiendo llamadas: ", p[-1])
 	else:
 		print ('<---[UNDECLARED_FUNCTION][Llamada]; Procedimiento "{0}" no se encuentra previamente declarado--->'.format(p[-1]))
 		exit(1)
@@ -833,30 +909,6 @@ def p_add_Llamada_5(p):
 		
 def p_character(p):
 	''' Character : PERSONAJE ID LLAVE_I CharacterA Archetype Estatuto2 LLAVE_D '''
-	# pass
-	# proc_brackList.append(p[2])
-	# x.current_fid = p[2]
-	# if x.current_fid in x.procs.keys():
-	# 	print ('Procedimiento "{0}" esta duplicdo y ya existe en el diccionario.'.format(p[3]))
-	# 	exit(1)
-	# else:
-	# 	#p.pprint(x.procs)
-	# 	tipo = procs_types.pop()	#Se saca el tipo de procedimiento de la lista de tipos
-	# 	#var_dict = var_brackList.pop()
-	# 	var_dict = {}
-	# 	#for c in range(len(var_brackList)):
-	# 	#	var_dict.update(var_brackList.pop())
-	# 	var_dummyBrackList = var_brackList
-	# 	for c in var_dummyBrackList:
-	# 		z = var_brackList.pop()
-	# 		if z == '@':
-	# 			break
-	# 		else:
-	# 			var_dict.update(z)
-	# 	count = contador_parametros.pop() # Se otiene el contador de parametros y se manda al dir. de procs.
-	# 	contador_parametros.append(0)	#Se vacia el listado y se reinicializa en 0 parametros
-	# 	x.procs.update(x.add_procs_to_dict(p[3],tipo, count, var_dict)) #se actualiza el diccionario de procedimientos
-	# 	var_dict = {}
 
 def p_charactera(p):
 	''' CharacterA : FVarsAsignacion 
@@ -878,7 +930,7 @@ def p_regresa(p):
 
 def p_regresa2(p):
 	''' Regresa2 : Expresion empty
-				 | ID add_ID '''
+				 | ID add_ID Entra_A_Var '''
 
 def p_add_ID(p):
 	''' add_ID : empty'''
@@ -960,9 +1012,9 @@ def p_add_For_3(p):
 
 def p_add_For_4(p):
 	'''add_For_4 : empty '''
-	print(PilaO)
+	#print(PilaO)
 	auxID = PilaO.pop()
-	print(PilaO)
+	#print(PilaO)
 	#add_quadruple('+', auxID, -1, auxID, -1, 0)
 	resultado_cuadruplo = add_quadruple('+', auxID, -1, 1, -1, 0)  #PREGUNTAR A NERI SI ESTO DEBE SER, O EL DE ARRIBA
 	add_quadruple('=', auxID, -1, resultado_cuadruplo, -1, 0)  #PREGUNTAR A NERI SI ESTO DEBE SER, O EL DE ARRIBA
@@ -1196,6 +1248,22 @@ def vars_return_type(nombre, v_id):
 	return False
 
 
+def vars_return_size_1(nombre, v_id):
+	auxlocal = x.procsLocal[nombre]['Var_Table'].keys()
+	auxglobal = x.procsGlobal.keys()
+	auxglobalnombre = auxglobal.pop()
+	auxglobal = x.procsGlobal[auxglobalnombre]['Var_Table'].keys()
+	
+
+	for key in auxlocal:
+		if key == v_id:
+			return x.procsLocal[nombre]['Var_Table'][v_id]['Size_1']
+	for key in auxglobal:
+		if key == v_id:
+			#print(x.procsGlobal[auxglobalnombre]['Var_Table'][v_id]['Size_1'])
+			return x.procsGlobal[auxglobalnombre]['Var_Table'][v_id]['Size_1']
+
+
 def operacion_cuadruplos(tempOPERADOR): 
 	operador = tempOPERADOR
 	tempTIPO2 = PTipos.pop()
@@ -1275,15 +1343,27 @@ if(len(sys.argv) > 1):
 	
 	#result = parser.parse(string, debug=log)
 	
+	
+	#DESCOMENTAR
+#	for z in PDimensionada:
+#		new_Value = Quads[ z[0] ][ z[1 ]]
+#		Quads[ z[0] ][ z[1 ]] = ''.join(new_Value)+"DIM"
+		#print (Quads)
+
 	output_dict = {
-	        'funcs_Global': Globals,
-	        'funcs_Local': Locals,
-	        'quadruples': Quads,
-	        'code': code
+	     'funcs_Global': Globals,
+	     'funcs_Local': Locals,
+	     'quadruples': Quads,
+	     'code': code
 	}
+	
+	#pp.pprint(output_dict)
+	
 	output_string = json.dumps(output_dict)
 	output_file = open('executable.json', 'w')
 	output_string = output_string
 	output_file.write(output_string)
+	
+	
 else:
 	print ("Error")

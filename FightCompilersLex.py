@@ -1,5 +1,6 @@
 # Proyecto compilador Python
-# PLY de Fight Compilers 2016
+# Compilador (Lexico) de Fight Compilers ENERO-MAYO 2016
+#!env/bin/python
 # Parte Lex
 # Hecho por Jaime Neri y Mike Grimaldo
 

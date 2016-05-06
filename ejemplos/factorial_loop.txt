@@ -1,7 +1,8 @@
 juego Juego_A :
-	var fact[1] : int, i[1] : int;
+	var fact[1] : int, i[1] : int, z[5] : int, j[1] : int;
 
 function int factorial ( int x ) {
+    fact = 1;
     if (x < 0){
         return false;
     }
@@ -26,5 +27,14 @@ function int factorial ( int x ) {
 main (){
     
     fact = 1;
-    output( factorial(5) );
+    
+    for j = 0 to 5 do{
+        z[j] = j+1;
+    };
+    
+    for j = 0 to 4 do {
+        output( factorial( z[j]) );
+    };
+        
+        
 }

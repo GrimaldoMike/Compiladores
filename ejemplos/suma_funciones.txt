@@ -2,13 +2,13 @@ juego Juego_A :
 	var x[1] : int, y[1]: int;
 
 function int suma ( int a, int b ) {
-
+    
     return a + b;
 }
 
 
 main (){
-    x= 2;
-    y = suma(1,8) + suma(2,4) - suma(x,4);
+    x[1] = 2;
+    y = suma(1,8) + suma(2,4) + suma(x[1],4);
     output(y);
 }

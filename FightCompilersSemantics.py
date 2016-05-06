@@ -1,3 +1,8 @@
+# Proyecto compilador Python
+# Validacion Cubo Smenatico de Fight Compilers ENERO-MAYO 2016
+# Hecho por Jaime Neri y Mike Grimaldo
+#!env/bin/python
+
 class Semantics(object):
     
     def __init__(self):
@@ -18,14 +23,15 @@ class Semantics(object):
         return proc_dict
 
     # Agrega nueva variable al diccionario de variables
-    def add_vars_to_dict(self, vtipo, vsize_1, vsize_2, fdirI):
+    def add_vars_to_dict(self, vtipo, vsize_1, vsize_2, fdirI, Dim):
         var_dict = {}
         var_dict = {
             #'Nombre' : vid,
             'Tipo' : vtipo,
             'Size_1' : vsize_1,
             'Size_2' : vsize_2,
-            'DireccionInicio': fdirI
+            'DireccionInicio': fdirI,
+            'Dimensionada_1': Dim
             }
         return var_dict
         

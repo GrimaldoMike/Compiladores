@@ -1,4 +1,6 @@
-
+// Usar la herramienta online RailRoad diagram generator para visualizar los diagramas de sintaxis utilizados //
+// Website:     http://bottlecaps.de/rr/ui //
+// Pegar solaente el codigo siguiente en el sitio (no pegar este texto) //
 JUEGO ::= 'juego' 'id' ':' VARS? (FUNCION | CHARACTER)* MAINPROGRAM
 
 VARS ::= 'var' VARS2 ';'
